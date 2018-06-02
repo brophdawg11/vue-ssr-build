@@ -6,7 +6,6 @@ import { fetchDataForComponents } from './utils';
 
 export default function initServer(createApp, serverOpts) {
     const opts = Object.assign({
-        fetchData: true,
         vuexModules: true,
     }, serverOpts);
 
@@ -36,11 +35,7 @@ export default function initServer(createApp, serverOpts) {
                     });
             }
 
-            const fetchDataPromise = opts.fetchData ?
-                fetchDataForComponents(components, store, router.currentRoute) :
-                Promise.resolve();
-
-            return fetchDataPromise
+            return fetchDataForComponents(components, store, router.currentRoute)
                 // Set initialState for client hydration
                 .then(() => Object.assign(context, {
                     initialState: JSON.stringify(store.state),

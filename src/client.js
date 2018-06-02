@@ -7,7 +7,6 @@ export default function initializeClient(createApp, clientOpts) {
         appSelector: '#app',
         initialState: null,
         initialStateMetaTag: 'initial-state',
-        fetchData: true,
         vuexModules: true,
     }, clientOpts);
 
@@ -63,33 +62,31 @@ export default function initializeClient(createApp, clientOpts) {
         });
     }
 
-    if (opts.fetchData) {
-        // Register the fetchData hook once the router is ready since we don't want to
-        // re-run fetchData for the SSR'd component
-        router.onReady(() => {
-            // Prior to resolving a route, execute any component fetchData methods.
-            // Approach based on:
+    // Register the fetchData hook once the router is ready since we don't want to
+    // re-run fetchData for the SSR'd component
+    router.onReady(() => {
+        // Prior to resolving a route, execute any component fetchData methods.
+        // Approach based on:
+        //   https://ssr.vuejs.org/en/data.html#client-data-fetching
+        router.beforeResolve((to, from, next) => {
+            // For simplicity, since we aren't using nested routes or anything fancy,
+            // we will just always call fetchData on the new components.  If we try to
+            // route to the same exact route, it shouldn't even fire the beforeResolve.
+            // And if we are routing to the same component with new params, then we
+            // likely want to be calling fetchData again.  If this proves to be too
+            // loose of an approach, a comprehensive approach is available at:
             //   https://ssr.vuejs.org/en/data.html#client-data-fetching
-            router.beforeResolve((to, from, next) => {
-                // For simplicity, since we aren't using nested routes or anything fancy,
-                // we will just always call fetchData on the new components.  If we try to
-                // route to the same exact route, it shouldn't even fire the beforeResolve.
-                // And if we are routing to the same component with new params, then we
-                // likely want to be calling fetchData again.  If this proves to be too
-                // loose of an approach, a comprehensive approach is available at:
-                //   https://ssr.vuejs.org/en/data.html#client-data-fetching
-                const components = router.getMatchedComponents(to);
-                return fetchDataForComponents(components, store, to)
-                    .then(() => next())
-                    .catch(e => {
-                        console.error('Error fetching component data, preventing routing', e);
-                        next(false);
-                    });
-            });
+            const components = router.getMatchedComponents(to);
+            return fetchDataForComponents(components, store, to)
+                .then(() => next())
+                .catch(e => {
+                    console.error('Error fetching component data, preventing routing', e);
+                    next(false);
+                });
         });
-    }
 
-    app.$mount(opts.appSelector);
+        app.$mount(opts.appSelector);
+    });
 
     if (opts.hmr && module.hot) {
         module.hot.accept();
