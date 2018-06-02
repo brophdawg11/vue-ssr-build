@@ -87,9 +87,9 @@ export default function initializeClient(createApp, clientOpts) {
                     });
             });
         });
-
-        app.$mount(opts.appSelector);
     }
+
+    app.$mount(opts.appSelector);
 
     if (opts.hmr && module.hot) {
         module.hot.accept();
