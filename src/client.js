@@ -1,16 +1,20 @@
-import { includes } from 'lodash-es';
+/* eslint-disable no-console */
+import { includes, isString } from 'lodash-es';
 import { fetchDataForComponents } from './utils';
 
 export default function initializeClient(createApp, clientOpts) {
     const opts = Object.assign({
+        appSelector: '#app',
         initialState: null,
+        initialStateMetaTag: 'initial-state',
         fetchData: true,
         vuexModules: true,
     }, clientOpts);
 
-    if (opts.initialState == null) {
+    if (opts.initialState == null && isString(opts.initialStateMetaTag)) {
         try {
-            const meta = document.querySelector('meta[name="initial-state"]');
+            const sel = `meta[name="${opts.initialStateMetaTag}"]`;
+            const meta = document.querySelector(sel);
             opts.initialState = JSON.parse(meta.getAttribute('content'));
         } catch (e) {
             console.error('Error hydrating initial state/mounting app', e);
@@ -82,9 +86,9 @@ export default function initializeClient(createApp, clientOpts) {
                         next(false);
                     });
             });
-
-            app.$mount('#app');
         });
+
+        app.$mount(opts.appSelector);
     }
 
     if (opts.hmr && module.hot) {
