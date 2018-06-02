@@ -22,7 +22,10 @@ function serverExternals(context, request, callback) {
     // lodash-es so we get proper tree shaking
     const nonRelativeExp = /^\w.*$/i;
     const lodashEsExp = /^lodash-es/;
-    if (nonRelativeExp.test(request) && !lodashEsExp.test(request)) {
+    const vurSsrBuildExp = /^vue-ssr-build/;
+    if (nonRelativeExp.test(request) &&
+        !lodashEsExp.test(request) &&
+        !vurSsrBuildExp.test(request)) {
         return callback(null, `commonjs ${request}`);
     }
     return callback();
