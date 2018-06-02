@@ -1,0 +1,31 @@
+{
+  "name": "vue-ssr-build",
+  "version": "0.1.0",
+  "description": "Vue.js SSR Build Helper",
+  "author": "matt@brophy.org",
+  "license": "MIT",
+  "engines": {
+    "node": ">=8.9.4",
+    "npm": ">=5.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brophdawg11/vue-ssr-build.git"
+  },
+  "scripts": {
+  },
+  "dependencies": {
+    "vue": "2.5.16",
+    "vue-server-renderer": "2.5.16",
+    "babel-loader": "7.1.4",
+    "css-loader": "0.28.11",
+    "node-sass": "4.9.0",
+    "sass-loader": "7.0.2",
+    "vue-loader": "15.2.4",
+    "vue-template-compiler": "2.5.16",
+    "webpack": "4.10.2",
+    "webpack-cli": "3.0.1",
+    "webpack-merge": "4.1.2",
+    "webpack-visualizer-plugin": "0.1.11"
+  }
+}
