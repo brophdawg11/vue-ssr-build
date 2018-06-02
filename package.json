@@ -12,8 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/brophdawg11/vue-ssr-build.git"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "dependencies": {
     "vue": "2.5.16",
     "vue-server-renderer": "2.5.16",

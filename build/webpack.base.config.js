@@ -33,7 +33,7 @@ module.exports = {
     isLocal,
     isProd,
     logLevel,
-    getBaseConfig(type) {
+    getBaseConfig(type, rootDir) {
         return {
             mode: environment,
             output: {
@@ -43,15 +43,15 @@ module.exports = {
             },
             resolve: {
                 alias: {
-                    '@content': path.resolve(__dirname, '../content'),
-                    '@components': path.resolve(__dirname, '../src/components'),
-                    '@dist': path.resolve(__dirname, '../dist'),
-                    '@js': path.resolve(__dirname, '../src/js'),
-                    '@scss': path.resolve(__dirname, '../src/scss'),
-                    '@server': path.resolve(__dirname, '../src/server'),
-                    '@src': path.resolve(__dirname, '../src'),
-                    '@static': path.resolve(__dirname, '../static'),
-                    '@store': path.resolve(__dirname, '../src/store'),
+                    '@content': path.resolve(rootDir, 'content'),
+                    '@components': path.resolve(rootDir, 'src/components'),
+                    '@dist': path.resolve(rootDir, 'dist'),
+                    '@js': path.resolve(rootDir, 'src/js'),
+                    '@scss': path.resolve(rootDir, 'src/scss'),
+                    '@server': path.resolve(rootDir, 'src/server'),
+                    '@src': path.resolve(rootDir, 'src'),
+                    '@static': path.resolve(rootDir, 'static'),
+                    '@store': path.resolve(rootDir, 'src/store'),
                 },
                 extensions: [ '*', '.js', '.vue', '.json' ],
             },
