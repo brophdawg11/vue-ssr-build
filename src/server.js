@@ -1,10 +1,10 @@
 /* eslint-disable no-console */
-import { fetchDataForComponents } from './utils';
+const { fetchDataForComponents } = require('./utils');
 
 // Server side data loading approach based on:
 // https://ssr.vuejs.org/en/data.html#client-data-fetching
 
-export default function initServer(createApp, serverOpts) {
+module.exports = function initServer(createApp, serverOpts) {
     const opts = Object.assign({
         fetchData: true,
         vuexModules: true,
@@ -55,4 +55,4 @@ export default function initServer(createApp, serverOpts) {
         router.push(context.url);
         router.onReady(onReady, reject);
     });
-}
+};
