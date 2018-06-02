@@ -2,7 +2,7 @@ import { includes } from 'lodash-es';
 import { fetchDataForComponents } from './utils';
 
 export default function initializeClient(createApp, clientOpts) {
-    const opts = Objecxt.assign({
+    const opts = Object.assign({
         initialState: null,
         fetchData: true,
         vuexModules: true,
@@ -11,9 +11,9 @@ export default function initializeClient(createApp, clientOpts) {
     if (opts.initialState == null) {
         try {
             const meta = document.querySelector('meta[name="initial-state"]');
-            state = JSON.parse(meta.getAttribute('content'));
+            opts.initialState = JSON.parse(meta.getAttribute('content'));
         } catch (e) {
-            logger.error('Error hydrating initial state/mounting app', e);
+            console.error('Error hydrating initial state/mounting app', e);
         }
     }
 
@@ -33,7 +33,7 @@ export default function initializeClient(createApp, clientOpts) {
             router.getMatchedComponents(to)
                 .filter(c => 'vuex' in c && !registeredModules[c.vuex.moduleName])
                 .forEach(c => {
-                    logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
+                    console.info('Registering dynamic Vuex module:', c.vuex.moduleName);
                     store.registerModule(c.vuex.moduleName, c.vuex.module, {
                         preserveState: store.state[c.vuex.moduleName] != null,
                     });
@@ -52,7 +52,7 @@ export default function initializeClient(createApp, clientOpts) {
                              'vuex' in c &&
                              registeredModules[c.vuex.moduleName])
                 .forEach(c => {
-                    logger.info('Unregistering dynamic Vuex module:', c.vuex.moduleName);
+                    console.info('Unregistering dynamic Vuex module:', c.vuex.moduleName);
                     store.unregisterModule(c.vuex.moduleName);
                     registeredModules[c.vuex.moduleName] = false;
                 });
@@ -78,7 +78,7 @@ export default function initializeClient(createApp, clientOpts) {
                 return fetchDataForComponents(components, store, to)
                     .then(() => next())
                     .catch(e => {
-                        logger.error('Error fetching component data, preventing routing', e);
+                        console.error('Error fetching component data, preventing routing', e);
                         next(false);
                     });
             });
