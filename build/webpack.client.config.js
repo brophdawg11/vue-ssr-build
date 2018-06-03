@@ -23,6 +23,9 @@ module.exports = function getClientConfig(rootDir) {
 
     if (isLocal) {
         // Wire up HMR on the client
+        // Can't use chunkhash while using HMR plugins
+        clientConfig.output.filename = '[name].[hash].js';
+        clientConfig.output.chunkFilename = '[name].chunk.[hash].js';
         clientConfig.entry = [
             'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
             ...clientConfig.entry,
@@ -34,4 +37,4 @@ module.exports = function getClientConfig(rootDir) {
     }
 
     return clientConfig;
-}
+};

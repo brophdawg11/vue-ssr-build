@@ -24,6 +24,7 @@ module.exports = function getMiddlewareConfig(rootDir) {
 
     if (isLocal) {
         // Wire up HMR on the server
+        // Can't use chunkhash while using HMR plugins
         middlewareConfig.plugins = [
             new webpack.HotModuleReplacementPlugin(),
             ...middlewareConfig.plugins,
@@ -31,4 +32,4 @@ module.exports = function getMiddlewareConfig(rootDir) {
     }
 
     return middlewareConfig;
-}
+};

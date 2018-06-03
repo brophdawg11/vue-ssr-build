@@ -1,34 +1,40 @@
-/* eslint-disable no-console,global-require,import/no-extraneous-dependencies */
+/* eslint-disable no-console */
 const assert = require('assert');
 const webpack = require('webpack');
+const devMiddleware = require('webpack-dev-middleware');
+const hotMiddleware = require('webpack-hot-middleware');
+const hotServerMiddleware = require('webpack-hot-server-middleware');
 
-function applyExpressMiddleware(app, middlewareOpts) {
+function applyExpressMiddleware(_app, middlewareOpts) {
     const opts = Object.assign({
         assert: true,
         clientConfig: null,
-        serverConfig: null,
+        heartbeat: 10 * 1000,
         hmrPath: '/__webpack_hmr',
+        logger: console.info,
+        middlewareConfig: null,
     }, middlewareOpts);
 
-    assert(opts.assert, 'Refusing to enable HMR due to failed assertion');
-    const compiler = webpack([ opts.clientConfig, opts.serverConfig ]);
+    assert(opts.assert, 'HMR should only be imported in dev environments');
+
+    const compiler = webpack([ opts.clientConfig, opts.middlewareConfig ]);
     const clientCompiler = compiler.compilers.find(c => c.name === 'client');
 
-    console.info('Registering HMR server and client middleware');
+    opts.logger('Registering HMR server and client middleware');
 
-    app.use(require('webpack-dev-middleware')(compiler, {
+    _app.use(devMiddleware(compiler, {
         logLevel: 'warn',
         publicPath: opts.clientConfig.output.publicPath,
         serverSideRender: true,
     }));
 
-    app.use(require('webpack-hot-middleware')(clientCompiler, {
-        log: console.info,
+    _app.use(hotMiddleware(clientCompiler, {
+        log: opts.logger,
         path: opts.hmrPath,
-        heartbeat: 10 * 1000,
+        heartbeat: opts.heartbeat,
     }));
 
-    app.use(require('webpack-hot-server-middleware')(compiler));
+    _app.use(hotServerMiddleware(compiler));
 }
 
 module.exports = {
