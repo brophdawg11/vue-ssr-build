@@ -1,4 +1,4 @@
-export function fetchDataForComponents(components, store, route) {
+function fetchDataForComponents(components, store, route) {
     // Execute all component methods in parallel
     return Promise.all(components.map(c => {
         if (c.fetchData) {
@@ -7,3 +7,7 @@ export function fetchDataForComponents(components, store, route) {
         return null;
     }));
 }
+
+export default {
+    fetchDataForComponents,
+};

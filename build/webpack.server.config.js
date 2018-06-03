@@ -25,4 +25,4 @@ module.exports = function getServerConfig(rootDir) {
     });
 
     return serverConfig;
-}
+};
