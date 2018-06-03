@@ -1,4 +1,4 @@
-function fetchDataForComponents(components, store, route) {
+export function fetchDataForComponents(components, store, route) {
     // Execute all component methods in parallel
     return Promise.all(components.map(c => {
         if (c.fetchData) {
@@ -8,6 +8,4 @@ function fetchDataForComponents(components, store, route) {
     }));
 }
 
-export default {
-    fetchDataForComponents,
-};
+export function noop() {}
