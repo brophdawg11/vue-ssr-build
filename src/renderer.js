@@ -1,4 +1,3 @@
-const path = require('path');
 const fs = require('fs');
 const LRU = require('lru-cache');
 const { createBundleRenderer } = require('vue-server-renderer');
@@ -6,8 +5,6 @@ const { createBundleRenderer } = require('vue-server-renderer');
 const config = require('./config')();
 
 const USE_STREAM = true;
-const resolve = file => path.resolve(__dirname, file);
-const templatePath = resolve('../index.tpl.html');
 let renderer;
 let readyPromise;
 
@@ -74,7 +71,7 @@ function render(req, res) {
     }
 }
 
-module.exports = function initVueRenderer(app, configOpts) {
+module.exports = function initVueRenderer(app, templatePath, configOpts) {
     /* eslint-disable global-require, import/no-unresolved */
     Object.assign(config, configOpts);
 
