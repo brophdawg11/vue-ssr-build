@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const LRU = require('lru-cache');
 const { createBundleRenderer } = require('vue-server-renderer');
 
@@ -71,8 +72,8 @@ function render(req, res) {
     }
 }
 
-module.exports = function initVueRenderer(app, templatePath, configOpts) {
-    /* eslint-disable global-require, import/no-unresolved */
+module.exports = function initVueRenderer(app, configOpts) {
+    /* eslint-disable global-require, import/no-unresolved, import/no-dynamic-require */
     Object.assign(config, configOpts);
 
     // In development: setup the dev server with watch and hot-reload,
@@ -80,7 +81,6 @@ module.exports = function initVueRenderer(app, templatePath, configOpts) {
     if (config.isLocal) {
         readyPromise = require('./setup-dev-server')(
             app,
-            templatePath,
             (bundle, options) => { renderer = createRenderer(bundle, options); },
         );
         return (req, res) => {
@@ -90,10 +90,9 @@ module.exports = function initVueRenderer(app, templatePath, configOpts) {
     }
 
     // Non-local mode without HMR
-    const template = fs.readFileSync(templatePath, 'utf-8');
-    const bundle = require('../../dist/vue-ssr-server-bundle.json');
-    const clientManifest = require('../../dist/vue-ssr-client-manifest.json');
+    const template = fs.readFileSync(config.templatePath, 'utf-8');
+    const bundle = require(path.resolve(config.clientManifest));
+    const clientManifest = require(path.resolve(config.serverBundle));
     renderer = createRenderer(bundle, { template, clientManifest });
     return render;
-    /* eslint-enable global-require, import/no-unresolved */
 };
