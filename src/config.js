@@ -4,6 +4,8 @@ module.exports = function getConfig() {
         isDev: process.env.NODE_ENV === 'development',
         isProd: process.env.NODE_ENV === 'production',
         templatePath: './src/index.tpl.html',
+        clientConfig: './build/webpack.client.config.js',
+        serverConfig: './build/webpack.server.config.js',
         clientManifest: './dist/vue-ssr-client-manifest.json',
         serverBundle: './dist/vue-ssr-server-bundle.json',
     };

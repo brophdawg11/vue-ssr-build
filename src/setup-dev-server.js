@@ -11,23 +11,26 @@ const webpackHotMiddleware = require('webpack-hot-middleware');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 /* eslint-enable import/no-extraneous-dependencies */
 
-const clientConfig = require('../build/webpack.client.config');
-const serverConfig = require('../build/webpack.server.config');
-
-const readFile = (_fs, file) => {
-    try {
-        return _fs.readFileSync(path.join(clientConfig.output.path, file), 'utf-8');
-    } catch (e) {
-        return null;
-    }
-};
-
 module.exports = function setupDevServer(app, config, cb) {
+
     let bundle;
     let template;
     let clientManifest;
 
     let ready;
+
+    /* eslint-disable global-require, import/no-dynamic-require */
+    const clientConfig = require(config.clientConfig);
+    const serverConfig = require(config.serverConfig);
+    /* eslint-enable global-require, import/no-dynamic-require */
+
+    const readFile = (_fs, file) => {
+        try {
+            return _fs.readFileSync(path.join(clientConfig.output.path, file), 'utf-8');
+        } catch (e) {
+            return null;
+        }
+    };
 
     const readyPromise = new Promise(r => { ready = r; });
     const update = () => {
