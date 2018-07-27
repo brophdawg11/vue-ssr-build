@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const fs = require('fs');
 const path = require('path');
 
@@ -9,16 +11,13 @@ const webpackHotMiddleware = require('webpack-hot-middleware');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 /* eslint-enable import/no-extraneous-dependencies */
 
-const logger = require('../js/logger');
-const clientConfig = require('../../build/webpack.client.config');
-const serverConfig = require('../../build/webpack.server.config');
+const clientConfig = require('../build/webpack.client.config');
+const serverConfig = require('../build/webpack.server.config');
 
 const readFile = (_fs, file) => {
     try {
-        //console.log(fs.readirSync('.'));
         return _fs.readFileSync(path.join(clientConfig.output.path, file), 'utf-8');
     } catch (e) {
-        logger.warn('Error reading file:', file, e);
         return null;
     }
 };
@@ -29,9 +28,9 @@ module.exports = function setupDevServer(app, templatePath, cb) {
     let clientManifest;
 
     let ready;
+
     const readyPromise = new Promise(r => { ready = r; });
     const update = () => {
-        logger.debug('Inside update');
         if (bundle && clientManifest) {
             ready();
             cb(bundle, {
@@ -45,7 +44,6 @@ module.exports = function setupDevServer(app, templatePath, cb) {
     template = fs.readFileSync(templatePath, 'utf-8');
     chokidar.watch(templatePath).on('change', () => {
         template = fs.readFileSync(templatePath, 'utf-8');
-        logger.debug('index.html template updated.');
         update();
     });
 
@@ -68,11 +66,12 @@ module.exports = function setupDevServer(app, templatePath, cb) {
     });
     app.use(devMiddleware);
     clientCompiler.plugin('done', stats => {
-        logger.debug('Compiled client');
         const json = stats.toJson();
-        json.errors.forEach(err => logger.error(err));
-        json.warnings.forEach(err => logger.warn(err));
-        if (json.errors.length) return
+        json.errors.forEach(err => console.error(err));
+        json.warnings.forEach(err => console.warn(err));
+        if (json.errors.length) {
+            return;
+        }
         clientManifest = JSON.parse(readFile(
             devMiddleware.fileSystem,
             'vue-ssr-client-manifest.json',
@@ -88,7 +87,6 @@ module.exports = function setupDevServer(app, templatePath, cb) {
     const mfs = new MFS();
     serverCompiler.outputFileSystem = mfs;
     serverCompiler.watch({}, (err, stats) => {
-        logger.debug('Compiled server');
         if (err) {
             throw err;
         }
