@@ -81,6 +81,7 @@ module.exports = function initVueRenderer(app, configOpts) {
     if (config.isLocal) {
         readyPromise = require('./setup-dev-server')(
             app,
+            config,
             (bundle, options) => { renderer = createRenderer(bundle, options); },
         );
         return (req, res) => {
