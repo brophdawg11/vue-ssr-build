@@ -39,6 +39,7 @@ module.exports = {
     getBaseConfig(type, rootDir) {
         return {
             mode: environment,
+            devtool: 'eval-source-map',
             output: {
                 publicPath: '/dist/',
                 filename: '[name].[chunkhash].js',
