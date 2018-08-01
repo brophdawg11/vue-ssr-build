@@ -5,7 +5,7 @@ const merge = require('webpack-merge');
 
 const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
 
-const { isLocal, getBaseConfig } = require('./webpack.base.config');
+const { getBaseConfig } = require('./webpack.base.config');
 
 module.exports = function getClientConfig(rootDir) {
     const clientConfig = merge(getBaseConfig('client', rootDir), {
@@ -18,13 +18,6 @@ module.exports = function getClientConfig(rootDir) {
             new VueSSRClientPlugin(),
         ],
     });
-
-    if (isLocal) {
-        // Wire up HMR on the client
-        // Can't use chunkhash while using HMR plugins
-        // clientConfig.output.filename = '[name].[hash].js';
-        // clientConfig.output.chunkFilename = '[name].chunk.[hash].js';
-    }
 
     return clientConfig;
 };

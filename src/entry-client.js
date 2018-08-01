@@ -1,6 +1,4 @@
-/* eslint-disable no-console */
 import { includes, isString } from 'lodash-es';
-import { fetchDataForComponents } from './utils';
 
 export default function initializeClient(createApp, clientOpts) {
     const opts = Object.assign({
@@ -8,6 +6,7 @@ export default function initializeClient(createApp, clientOpts) {
         initialState: null,
         initialStateMetaTag: 'initial-state',
         vuexModules: true,
+        logger: console,
     }, clientOpts);
 
     if (opts.initialState == null && isString(opts.initialStateMetaTag)) {
@@ -16,7 +15,7 @@ export default function initializeClient(createApp, clientOpts) {
             const meta = document.querySelector(sel);
             opts.initialState = JSON.parse(meta.getAttribute('content'));
         } catch (e) {
-            console.error('Error hydrating initial state/mounting app', e);
+            opts.logger.error('Error hydrating initial state/mounting app', e);
         }
     }
 
@@ -36,7 +35,7 @@ export default function initializeClient(createApp, clientOpts) {
             router.getMatchedComponents(to)
                 .filter(c => 'vuex' in c && !registeredModules[c.vuex.moduleName])
                 .forEach(c => {
-                    console.info('Registering dynamic Vuex module:', c.vuex.moduleName);
+                    opts.logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
                     store.registerModule(c.vuex.moduleName, c.vuex.module, {
                         preserveState: store.state[c.vuex.moduleName] != null,
                     });
@@ -55,7 +54,7 @@ export default function initializeClient(createApp, clientOpts) {
                              'vuex' in c &&
                              registeredModules[c.vuex.moduleName])
                 .forEach(c => {
-                    console.info('Unregistering dynamic Vuex module:', c.vuex.moduleName);
+                    opts.logger.info('Unregistering dynamic Vuex module:', c.vuex.moduleName);
                     store.unregisterModule(c.vuex.moduleName);
                     registeredModules[c.vuex.moduleName] = false;
                 });
@@ -77,10 +76,11 @@ export default function initializeClient(createApp, clientOpts) {
             // loose of an approach, a comprehensive approach is available at:
             //   https://ssr.vuejs.org/en/data.html#client-data-fetching
             const components = router.getMatchedComponents(to);
-            return fetchDataForComponents(components, store, to)
+            const fetchData = c => c.fetchData && c.fetchData({ store, route: to });
+            return Promise.all(components.map(fetchData))
                 .then(() => next())
                 .catch(e => {
-                    console.error('Error fetching component data, preventing routing', e);
+                    opts.logger.error('Error fetching component data, preventing routing', e);
                     next(false);
                 });
         });

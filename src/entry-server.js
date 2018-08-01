@@ -1,12 +1,10 @@
-/* eslint-disable no-console */
-import { fetchDataForComponents } from './utils';
-
 // Server side data loading approach based on:
 // https://ssr.vuejs.org/en/data.html#client-data-fetching
 
 export default function initServer(createApp, serverOpts) {
     const opts = Object.assign({
         vuexModules: true,
+        logger: console,
     }, serverOpts);
 
     return (context) => new Promise((resolve, reject) => {
@@ -16,7 +14,7 @@ export default function initServer(createApp, serverOpts) {
             const components = router.getMatchedComponents();
 
             if (!components.length) {
-                console.warn(`No matched components for route: ${context.req.url}`);
+                opts.logger.warn(`No matched components for route: ${context.req.url}`);
                 return reject({ code: 404, message: 'Not Found' });
             }
 
@@ -28,21 +26,25 @@ export default function initServer(createApp, serverOpts) {
                 components
                     .filter(c => 'vuex' in c)
                     .forEach(c => {
-                        console.info('Registering dynamic Vuex module:', c.vuex.moduleName);
+                        opts.logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
                         store.registerModule(c.vuex.moduleName, c.vuex.module, {
                             preserveState: store.state[c.vuex.moduleName] != null,
                         });
                     });
             }
 
-            return fetchDataForComponents(components, store, router.currentRoute)
+            const fetchData = c => c.fetchData && c.fetchData({
+                store,
+                route: router.currentRoute,
+            });
+            return Promise.all(components.map(fetchData))
                 // Set initialState for client hydration
                 .then(() => Object.assign(context, {
                     initialState: JSON.stringify(store.state),
                 }))
                 .then(() => resolve(app))
                 .catch(e => {
-                    console.error('Caught server-side error in fetchData', e);
+                    opts.logger.error('Caught server-side error in fetchData', e);
                     return reject(e);
                 });
         }

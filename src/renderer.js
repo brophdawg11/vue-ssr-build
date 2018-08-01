@@ -3,7 +3,17 @@ const path = require('path');
 const LRU = require('lru-cache');
 const { createBundleRenderer } = require('vue-server-renderer');
 
-const config = require('./config')();
+// Base config - extended via client argument to initVueRenderer
+const config = {
+    isLocal: process.env.NODE_ENV === 'local',
+    isDev: process.env.NODE_ENV === 'development',
+    isProd: process.env.NODE_ENV === 'production',
+    templatePath: './src/index.tpl.html',
+    clientConfig: './build/webpack.client.config.js',
+    serverConfig: './build/webpack.server.config.js',
+    clientManifest: './dist/vue-ssr-client-manifest.json',
+    serverBundle: './dist/vue-ssr-server-bundle.json',
+};
 
 const USE_STREAM = true;
 let renderer;
