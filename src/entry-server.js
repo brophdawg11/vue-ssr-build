@@ -57,7 +57,7 @@ export default function initializeServer(createApp, serverOpts) {
                     // the template for client hydration
                     .then(() => Object.assign(context, {
                         initialState: JSON.stringify(store.state),
-                        translations,
+                        translations: JSON.stringify(translations),
                     }))
                     .then(() => resolve(app))
                     .catch((e) => {
