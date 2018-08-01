@@ -18,12 +18,13 @@ module.exports = {
         '^@dist/(.*)$': '<rootDir>/dist/$1',
     },
     snapshotSerializers: [ 'jest-serializer-vue' ],
+    testURL: 'http://localhost',
     transform: {
         '^.+\\.vue$': 'vue-jest',
         '^.+\\.js?$': 'babel-jest',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!lodash-es)',
+        'node_modules/(?!(lodash-es|vue-ssr-build))',
     ],
     verbose: true,
 };
