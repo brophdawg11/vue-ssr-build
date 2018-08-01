@@ -68,6 +68,7 @@ module.exports = function setupDevServer(app, config, cb) {
     const devMiddleware = webpackDevMiddleware(clientCompiler, {
         publicPath: clientConfig.output.publicPath,
         noInfo: true,
+        stats: 'minimal',
     });
     app.use(devMiddleware);
     clientCompiler.plugin('done', (stats) => {
