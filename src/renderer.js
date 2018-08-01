@@ -8,6 +8,8 @@ const config = {
     isLocal: process.env.NODE_ENV === 'local',
     isDev: process.env.NODE_ENV === 'development',
     isProd: process.env.NODE_ENV === 'production',
+    hmr: false,
+    i18nDirective: false,
     templatePath: null,
     clientConfig: null,
     serverConfig: null,
@@ -20,12 +22,18 @@ let renderer;
 let readyPromise;
 
 function createRenderer(bundle, options) {
+    /* eslint-disable global-require */
+    const t = options.i18nDirective ?
+        require('vue-i18n-extensions').directive :
+        null;
     return createBundleRenderer(bundle, Object.assign(options, {
         cache: LRU({
             max: 1000,
             maxAge: 1000 * 60 * 15,
         }),
         runInNewContext: false,
+        // Only include the t directive when specified
+        ...(t ? { directives: { t } } : {}),
     }));
 }
 
@@ -88,7 +96,7 @@ module.exports = function initVueRenderer(app, configOpts) {
 
     // In development: setup the dev server with watch and hot-reload,
     // and create a new renderer on bundle / index template update.
-    if (config.isLocal) {
+    if (config.hmr) {
         readyPromise = require('./setup-dev-server')(
             app,
             config,

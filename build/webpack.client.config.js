@@ -8,8 +8,14 @@ const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
 
 const { getBaseConfig } = require('./webpack.base.config');
 
-module.exports = function getClientConfig(rootDir) {
-    const clientConfig = merge(getBaseConfig('client', rootDir), {
+module.exports = function getClientConfig(configOpts) {
+    const config = Object.assign({
+        type: 'client',
+        rootDir: null,
+        i18nBlocks: false,
+    }, configOpts);
+
+    const clientConfig = merge(getBaseConfig('client', config), {
         name: 'client',
         entry: {
             app: './src/js/entry-client.js',

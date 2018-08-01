@@ -4,24 +4,34 @@ export default function initializeClient(createApp, clientOpts) {
     const opts = Object.assign({
         appSelector: '#app',
         hmr: true,
+        initialTranslationsMetaTag: null,
         initialState: null,
         initialStateMetaTag: 'initial-state',
         vuexModules: true,
         logger: console,
     }, clientOpts);
 
-    if (opts.initialState == null && isString(opts.initialStateMetaTag)) {
+    function getParsedMetaContent(name) {
         try {
-            const sel = `meta[name="${opts.initialStateMetaTag}"]`;
-            const meta = document.querySelector(sel);
-            opts.initialState = JSON.parse(meta.getAttribute('content'));
+            const meta = document.querySelector(`meta[name="${name}"]`);
+            return JSON.parse(meta.getAttribute('content'));
         } catch (e) {
-            opts.logger.error('Error hydrating initial state/mounting app', e);
+            opts.logger.error(`Error parsing meta tag content: ${name}`);
+            return null;
         }
     }
 
+    const initialState = isString(opts.initialStateMetaTag) ?
+        getParsedMetaContent(opts.initialStateMetaTag) :
+        null;
+
+    const translations = isString(opts.initialTranslationsMetaTag) ?
+        getParsedMetaContent(opts.initialTranslationsMetaTag) :
+        null;
+
     const { app, router, store } = createApp({
-        initialState: opts.initialState,
+        initialState,
+        translations,
     });
 
     if (opts.vuexModules) {
