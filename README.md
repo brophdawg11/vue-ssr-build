@@ -152,3 +152,28 @@ app.use('*', vueRenderer(app, {
     serverBundle: path.resolve('./dist/vue-ssr-server-bundle.json'),
 }));
 ```
+
+#### Babel, ESLint, Jest Configurations
+
+For ease of use, this repository also provides `.babelrc.js`, `.eslintrc.js` and `jest.config.js` files that should work with the default configurations.  Simply import them into your configs an extend as needed.
+
+#### Folder structure
+
+This repository assumes a default folder structure and sets up webpack aliases and jest resolvers accordingly.  This can be overrideen in your own configurations.
+
+```
+YourRepo/
+  build/
+    ## Webpack configs here
+  dist/  (alias @dist)
+    ## Webpack should write output here  
+  src/
+    components/   (alias @components)
+    js/           (alias @js)
+    scss/         (alias @scss)
+    server/       (alias @server)
+    store/        (alias @store)
+  static/         (alias @static)
+    ## Static files (favicon.ico, etc.)
+```
+
