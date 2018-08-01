@@ -33,7 +33,7 @@ At one point in time, I found myself maintaining 3 or 4 separate Vue SSR apps.  
 * Beyond that, all of the apps were being linted and unit tested in the same ways, so whenever those underlying frameworks were updated, it again required duplicate updates across multiple apps:
   *  `eslint`, `jest`, `eslint-plugin-vue`, `jest-serializer-vue`, etc.
 * Often, while working in a single app, a new approach would occur to me that would enhance the logic being used for the core Vue SSR approach within the app.  This change would then need to be ported to each of the other apps
-  * Build adjustments (base, client, server, or middleware) 
+  * Build adjustments (base, client, server, or middleware)
   * Adjustments to the `fetchData` approach
   * Dynamic vuex module support
   * Routing logic alterations
@@ -121,7 +121,7 @@ import createApp from '@js/create-app';
 
 export default initializeServer(createApp, {
     // The following are all available options and their default values:
-    
+
     // Wire up logic for route-level vuex modules?
     vuexModules: true,
     // Logger instance
@@ -136,6 +136,7 @@ const express = require('express');
 
 const app = express();
 
+const rootPath = path.join(__dirname, '../..');
 app.use('*', vueRenderer(app, {
     // The following are all available options and their default values:
     // Local build - includes HMR
@@ -144,12 +145,12 @@ app.use('*', vueRenderer(app, {
     isDev:  process.env.NODE_ENV === 'development',
     // Prod build - minification, no HMR
     isProd:  process.env.NODE_ENV === 'production',
-    // All paths are relative to the root of the repo
-    templatePath: path.resolve('./src/index.tpl.html'),
-    clientConfig: path.resolve('./build/webpack.client.config.js'),
-    serverConfig: path.resolve('./build/webpack.server.config.js'),
-    clientManifest: path.resolve('./dist/vue-ssr-client-manifest.json'),
-    serverBundle: path.resolve('./dist/vue-ssr-server-bundle.json'),
+    // The remaining must be specified as absolute paths:
+    templatePath:   path.join(rootDir, 'src/index.tpl.html'),
+    clientConfig:   path.join(rootDir, 'build/webpack.client.config.js'),
+    serverConfig:   path.join(rootDir, 'build/webpack.server.config.js'),
+    clientManifest: path.join(rootDir, 'dist/vue-ssr-client-manifest.json'),
+    serverBundle:   path.join(rootDir, 'dist/vue-ssr-server-bundle.json'),
 }));
 ```
 
@@ -166,7 +167,7 @@ YourRepo/
   build/
     ## Webpack configs here
   dist/  (alias @dist)
-    ## Webpack should write output here  
+    ## Webpack should write output here
   src/
     components/   (alias @components)
     js/           (alias @js)

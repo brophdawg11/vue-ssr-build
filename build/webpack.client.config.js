@@ -11,9 +11,9 @@ const { getBaseConfig } = require('./webpack.base.config');
 module.exports = function getClientConfig(rootDir) {
     const clientConfig = merge(getBaseConfig('client', rootDir), {
         name: 'client',
-        entry: [
-            './src/js/entry-client.js',
-        ],
+        entry: {
+            app: './src/js/entry-client.js',
+        },
         plugins: [
             new webpack.DefinePlugin({ 'process.env.VUE_ENV': '"client"' }),
             new VueSSRClientPlugin(),
