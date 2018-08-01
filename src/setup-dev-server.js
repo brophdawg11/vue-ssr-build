@@ -32,7 +32,7 @@ module.exports = function setupDevServer(app, config, cb) {
         }
     };
 
-    const readyPromise = new Promise(r => { ready = r; });
+    const readyPromise = new Promise((r) => { ready = r; });
     const update = () => {
         if (bundle && clientManifest) {
             ready();
@@ -68,7 +68,7 @@ module.exports = function setupDevServer(app, config, cb) {
         noInfo: true,
     });
     app.use(devMiddleware);
-    clientCompiler.plugin('done', stats => {
+    clientCompiler.plugin('done', (stats) => {
         const json = stats.toJson();
         json.errors.forEach(err => console.error(err));
         json.warnings.forEach(err => console.warn(err));

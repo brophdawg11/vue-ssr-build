@@ -57,7 +57,7 @@ module.exports = {
                     '@static': path.resolve(rootDir, 'static'),
                     '@store': path.resolve(rootDir, 'src/store'),
                 },
-                extensions: [ '*', '.js', '.vue', '.json' ],
+                extensions: ['*', '.js', '.vue', '.json'],
             },
             externals: type === 'client' ? '' : serverExternals,
             module: {

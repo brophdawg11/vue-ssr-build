@@ -35,7 +35,7 @@ export default function initializeClient(createApp, clientOpts) {
         router.beforeResolve((to, from, next) => {
             router.getMatchedComponents(to)
                 .filter(c => 'vuex' in c && !registeredModules[c.vuex.moduleName])
-                .forEach(c => {
+                .forEach((c) => {
                     opts.logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
                     store.registerModule(c.vuex.moduleName, c.vuex.module, {
                         preserveState: store.state[c.vuex.moduleName] != null,
@@ -54,7 +54,7 @@ export default function initializeClient(createApp, clientOpts) {
                 .filter(c => !includes(components, c) &&
                              'vuex' in c &&
                              registeredModules[c.vuex.moduleName])
-                .forEach(c => {
+                .forEach((c) => {
                     opts.logger.info('Unregistering dynamic Vuex module:', c.vuex.moduleName);
                     store.unregisterModule(c.vuex.moduleName);
                     registeredModules[c.vuex.moduleName] = false;
@@ -80,7 +80,7 @@ export default function initializeClient(createApp, clientOpts) {
             const fetchData = c => c.fetchData && c.fetchData({ store, route: to });
             return Promise.all(components.map(fetchData))
                 .then(() => next())
-                .catch(e => {
+                .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing', e);
                     next(false);
                 });

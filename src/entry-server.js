@@ -7,7 +7,7 @@ export default function initServer(createApp, serverOpts) {
         logger: console,
     }, serverOpts);
 
-    return (context) => new Promise((resolve, reject) => {
+    return context => new Promise((resolve, reject) => {
         const { app, router, store } = createApp({ request: context.req });
 
         function onReady() {
@@ -25,7 +25,7 @@ export default function initServer(createApp, serverOpts) {
                 // bundle
                 components
                     .filter(c => 'vuex' in c)
-                    .forEach(c => {
+                    .forEach((c) => {
                         opts.logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
                         store.registerModule(c.vuex.moduleName, c.vuex.module, {
                             preserveState: store.state[c.vuex.moduleName] != null,
@@ -43,7 +43,7 @@ export default function initServer(createApp, serverOpts) {
                     initialState: JSON.stringify(store.state),
                 }))
                 .then(() => resolve(app))
-                .catch(e => {
+                .catch((e) => {
                     opts.logger.error('Caught server-side error in fetchData', e);
                     return reject(e);
                 });

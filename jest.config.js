@@ -1,6 +1,6 @@
 module.exports = {
     collectCoverage: true,
-    collectCoverageFrom: [ 'src/**/*.{js,vue}' ],
+    collectCoverageFrom: ['src/**/*.{js,vue}'],
     globals: {
         NODE_ENV: 'test',
     },
@@ -17,7 +17,7 @@ module.exports = {
         '^@store/(.*)$': '<rootDir>/src/store/$1',
         '^@dist/(.*)$': '<rootDir>/dist/$1',
     },
-    snapshotSerializers: [ 'jest-serializer-vue' ],
+    snapshotSerializers: ['jest-serializer-vue'],
     testURL: 'http://localhost',
     transform: {
         '^.+\\.vue$': 'vue-jest',
