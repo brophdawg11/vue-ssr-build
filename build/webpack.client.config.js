@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 const webpack = require('webpack');
 const merge = require('webpack-merge');
+const VisualizerPlugin = require('webpack-visualizer-plugin');
 /* eslint-enable import/no-extraneous-dependencies */
 
 const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
@@ -16,6 +17,7 @@ module.exports = function getClientConfig(rootDir) {
         plugins: [
             new webpack.DefinePlugin({ 'process.env.VUE_ENV': '"client"' }),
             new VueSSRClientPlugin(),
+            new VisualizerPlugin(),
         ],
     });
 
