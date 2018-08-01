@@ -46,6 +46,7 @@ module.exports = function setupDevServer(app, config, cb) {
     // read template from disk and watch
     template = fs.readFileSync(config.templatePath, 'utf-8');
     chokidar.watch(config.templatePath).on('change', () => {
+        console.error('Template file updated');
         template = fs.readFileSync(config.templatePath, 'utf-8');
         update();
     });
@@ -62,13 +63,16 @@ module.exports = function setupDevServer(app, config, cb) {
     );
 
     // dev middleware
+    console.error('Launching client webpack build');
     const clientCompiler = webpack(clientConfig);
     const devMiddleware = webpackDevMiddleware(clientCompiler, {
         publicPath: clientConfig.output.publicPath,
         noInfo: true,
+        stats: 'minimal',
     });
     app.use(devMiddleware);
     clientCompiler.plugin('done', (stats) => {
+        console.error('Completed client webpack build');
         const json = stats.toJson();
         json.errors.forEach(err => console.error(err));
         json.warnings.forEach(err => console.warn(err));
@@ -86,10 +90,12 @@ module.exports = function setupDevServer(app, config, cb) {
     app.use(webpackHotMiddleware(clientCompiler, { heartbeat: 5000 }));
 
     // watch and update server renderer
+    console.error('Launching server webpack build');
     const serverCompiler = webpack(serverConfig);
     const mfs = new MFS();
     serverCompiler.outputFileSystem = mfs;
     serverCompiler.watch({}, (err, stats) => {
+        console.error('Completed server webpack build');
         if (err) {
             throw err;
         }
