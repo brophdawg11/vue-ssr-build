@@ -3,6 +3,7 @@ import { includes, isString } from 'lodash-es';
 export default function initializeClient(createApp, clientOpts) {
     const opts = Object.assign({
         appSelector: '#app',
+        hmr: true,
         initialState: null,
         initialStateMetaTag: 'initial-state',
         vuexModules: true,
