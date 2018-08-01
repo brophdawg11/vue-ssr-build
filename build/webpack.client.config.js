@@ -13,6 +13,8 @@ module.exports = function getClientConfig(configOpts) {
         type: 'client',
         rootDir: null,
         i18nBlocks: false,
+        theme: null,
+        sassLoaderData: null,
     }, configOpts);
 
     const clientConfig = merge(getBaseConfig(config), {

@@ -26,6 +26,8 @@ module.exports = function getServerConfig(configOpts) {
         type: 'server',
         rootDir: null,
         i18nBlocks: false,
+        theme: null,
+        sassLoaderData: null,
     }, configOpts);
 
     const serverConfig = merge(getBaseConfig(config), {

@@ -51,6 +51,16 @@ module.exports = {
                         loader: 'vue-loader',
                     },
 
+                    // Only include the themed style loader if a theme is
+                    // specified
+                    ...(config.theme ? [{
+                        test: /\.vue$/,
+                        loader: 'vue-themed-style-loader',
+                        options: {
+                            theme: config.theme,
+                        },
+                    }] : []),
+
                     // Only include the i18n-loader if specified
                     ...(config.i18nBlocks ? [{
                         resourceQuery: /blockType=i18n/,
@@ -84,7 +94,15 @@ module.exports = {
                                     minimize: isProd,
                                 },
                             },
-                            'sass-loader',
+                            {
+                                loader: 'sass-loader',
+                                ...(config.sassLoaderData ? {
+                                    options: {
+                                        data: config.sassLoaderData,
+                                    },
+                                } : {}),
+                            },
+
                         ],
                     },
                     {
