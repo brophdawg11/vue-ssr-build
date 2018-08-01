@@ -42,8 +42,8 @@ module.exports = {
             devtool: 'eval-source-map',
             output: {
                 publicPath: '/dist/',
-                filename: '[name].[chunkhash].js',
-                chunkFilename: '[name].chunk.[chunkhash].js',
+                filename: isProd ? '[name].[chunkhash].js' : '[name].js',
+                chunkFilename: isProd ? '_[name].[chunkhash].js' : '_[name].js',
             },
             resolve: {
                 alias: {
