@@ -28,7 +28,7 @@ module.exports = function getServerConfig(configOpts) {
         i18nBlocks: false,
     }, configOpts);
 
-    const serverConfig = merge(getBaseConfig('server', config), {
+    const serverConfig = merge(getBaseConfig(config), {
         // Note: Do not start this name with server- as that will confuse the
         // webpack-hot-server-middleware plugin
         name: 'vue-ssr-bundle',

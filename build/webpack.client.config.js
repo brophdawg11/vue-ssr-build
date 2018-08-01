@@ -15,7 +15,7 @@ module.exports = function getClientConfig(configOpts) {
         i18nBlocks: false,
     }, configOpts);
 
-    const clientConfig = merge(getBaseConfig('client', config), {
+    const clientConfig = merge(getBaseConfig(config), {
         name: 'client',
         entry: {
             app: './src/js/entry-client.js',
