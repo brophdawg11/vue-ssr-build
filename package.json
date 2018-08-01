@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "1.0.0-beta.10",
+  "version": "1.0.0-beta.11",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
@@ -42,6 +42,7 @@
     "vue-loader": "15.2.4",
     "vue-server-renderer": "2.5.16",
     "vue-template-compiler": "2.5.16",
+    "vue-themed-style-loader": "0.2.0",
     "webpack": "4.10.2",
     "webpack-cli": "3.0.1",
     "webpack-dev-middleware": "3.1.3",
