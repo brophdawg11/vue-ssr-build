@@ -24,7 +24,7 @@ module.exports = {
     getBaseConfig(config) {
         return {
             mode: environment,
-            devtool: 'eval-source-map',
+            devtool: isProd ? 'source-map' : 'eval-source-map',
             output: {
                 publicPath: '/dist/',
                 filename: isProd ? '[name].[chunkhash].js' : '[name].js',
