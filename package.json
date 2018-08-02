@@ -33,6 +33,7 @@
     "jest": "23.4.2",
     "jest-serializer-vue": "2.0.2",
     "lodash-es": "4.17.10",
+    "lru-cache": "4.1.3",
     "node-sass": "4.9.2",
     "sass-loader": "7.1.0",
     "vue": "2.5.17",
@@ -53,10 +54,10 @@
   },
   "peerDependencies": {
     "lru-cache": "^4.1.3",
-    "vue": "^2.5.16",
+    "vue": "^2.5.17",
     "vue-i18n": "^8.0.0",
     "vue-i18n-extensions": "^0.1.0",
-    "vue-server-renderer": "^2.5.16"
+    "vue-server-renderer": "^2.5.17"
   },
   "devDependencies": {
     "husky": "0.14.3"
