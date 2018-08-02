@@ -105,4 +105,3 @@ export default function initializeClient(createApp, clientOpts) {
 
     return { app, router, store };
 }
-

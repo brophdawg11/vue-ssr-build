@@ -27,24 +27,26 @@ module.exports = {
     },
     rules: {
         // 4 space indent
-        "indent": [ "error", 4 ],
+        'indent': [ 'error', 4 ],
         // Don't enforce newlines on function parens
-        "function-paren-newline": 'off',
+        'function-paren-newline': 'off',
         // Max length 0f 80 characters in source code
-        "max-len": ['error', {
+        'max-len': ['error', {
             code: 100,
             ignoreUrls: true
         }],
         // Don't allow console.*, force logger usage
         'no-console': 'error',
         // Allow unary ++ and -- operators
-        "no-plusplus": 'off',
+        'no-plusplus': 'off',
         // Don't enforce one-var for now
-        "one-var": 'off',
+        'one-var': 'off',
+        // Put operators at the end of the lint (?, :, &&, ||)
+        'operator-linebreak': ['error', 'after'],
         // Don't enforce a blank line or not at the beginning of a block
-        "padded-blocks": 'off',
+        'padded-blocks': 'off',
         // Don't enforce promises being rejected with Error objects
-        "prefer-promise-reject-errors": 'off',
+        'prefer-promise-reject-errors': 'off',
         // Require extensions on non-JS files.  Turned off for now because when
         // aliased imports are ignored below, this can't determine the proper
         // extension and therefore causes all aliases imports to error
@@ -52,19 +54,19 @@ module.exports = {
         'import/extensions': 'off',
         // doesn't seem to play nice with aliases
         // See: https://github.com/benmosher/eslint-plugin-import/issues/376
-        "import/no-unresolved": ['error', {
+        'import/no-unresolved': ['error', {
             commonjs: true,
             ignore: [ '^@' ],
         }],
         // Use 4 space indents in templates
-        "vue/html-indent": ['error', 4],
+        'vue/html-indent': ['error', 4],
         // Allow max 2 attributes on a single line element, but once the
         // element is spread across multiple, require one attribute per line
-        "vue/max-attributes-per-line": ['error', {
-            "singleline": 3,
-            "multiline": {
-                "max": 1,
-                "allowFirstLine": true
+        'vue/max-attributes-per-line': ['error', {
+            'singleline': 3,
+            'multiline': {
+                'max': 1,
+                'allowFirstLine': true
             }
         }]
     },
