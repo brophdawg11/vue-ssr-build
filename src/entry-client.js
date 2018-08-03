@@ -29,12 +29,10 @@ export default function initializeClient(createApp, clientOpts) {
         getParsedMetaContent(opts.initialTranslationsMetaTag) :
         null;
 
-    const {
-        a15Svc,
-        app,
-        router,
-        store,
-    } = createApp({ initialState, translations });
+    const { app, router, store } = createApp({
+        initialState,
+        translations,
+    });
 
     if (opts.vuexModules) {
         // This is a temporary workaround for us to use to prevent re-registering
@@ -89,7 +87,7 @@ export default function initializeClient(createApp, clientOpts) {
             // loose of an approach, a comprehensive approach is available at:
             //   https://ssr.vuejs.org/en/data.html#client-data-fetching
             const components = router.getMatchedComponents(to);
-            const fetchData = c => c.fetchData && c.fetchData({ a15Svc, store, route: to });
+            const fetchData = c => c.fetchData && c.fetchData({ store, route: to });
             return Promise.all(components.map(fetchData))
                 .then(() => next())
                 .catch((e) => {

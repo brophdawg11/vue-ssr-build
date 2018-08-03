@@ -20,12 +20,10 @@ export default function initializeServer(createApp, serverOpts) {
 
         function initApp(translations) {
             // Initialize our app with proper request and translations
-            const {
-                a15Svc,
-                app,
-                router,
-                store,
-            } = createApp({ request: context.req, translations });
+            const { app, router, store } = createApp({
+                request: context.req,
+                translations,
+            });
 
             function onReady() {
                 const components = router.getMatchedComponents();
@@ -51,7 +49,6 @@ export default function initializeServer(createApp, serverOpts) {
                 }
 
                 const fetchData = c => c.fetchData && c.fetchData({
-                    a15Svc,
                     store,
                     route: router.currentRoute,
                 });
