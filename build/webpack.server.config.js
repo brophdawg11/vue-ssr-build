@@ -11,11 +11,13 @@ function serverExternals(context, request, callback) {
     // Tell webpack to ignore all node_modules dependencies except
     // lodash-es so we get proper tree shaking
     const nonRelativeExp = /^\w.*$/i;
-    const lodashEsExp = /^lodash-es/;
-    const vurSsrBuildExp = /^vue-ssr-build/;
+    const es6NodeModuleExps = [
+        /^lodash-es/,
+        /^vue-ssr-build/,
+        /^a15-js-service/,
+    ];
     if (nonRelativeExp.test(request) &&
-        !lodashEsExp.test(request) &&
-        !vurSsrBuildExp.test(request)) {
+        es6NodeModuleExps.find(re => !re.test(request)) != null) {
         return callback(null, `commonjs ${request}`);
     }
     return callback();
