@@ -22,6 +22,7 @@ export default function initializeServer(createApp, serverOpts) {
             // Initialize our app with proper request and translations
             const { app, router, store } = createApp({
                 request: context.req,
+                response: context.res,
                 translations,
             });
 
