@@ -10,6 +10,7 @@ const config = {
     isProd: process.env.NODE_ENV === 'production',
     hmr: false,
     i18nDirective: false,
+    rendererOpts: null,
     templatePath: null,
     clientConfig: null,
     serverConfig: null,
@@ -34,7 +35,7 @@ function createRenderer(bundle, options) {
         runInNewContext: false,
         // Only include the t directive when specified
         ...(t ? { directives: { t } } : {}),
-    }));
+    }, options.rendererOpts));
 }
 
 const handleError = (err, res) => {

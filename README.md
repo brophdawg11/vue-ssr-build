@@ -73,7 +73,18 @@ const { join } = require('path');
 const merge = require('webpack-merge');
 const getClientConfig = require('vue-ssr-build/build/webpack.client.config');
 
-module.exports = merge(getClientConfig(join(__dirname, '..')), {
+// Configuration options that can be passed to getClientConfig
+const configOpts = {
+    type: 'client',    // required (client|server)
+    rootDir: null,     // required - root directory of the repo, 
+                       // used for aliases
+    i18nBlocks: false, // Boolean - include support for <i18n> blocks 
+                       // in components
+    theme: null,       // Theme for vue-themed-style-loader
+    sassLoaderData: null,  // Data to pass to sass-loader
+};
+
+module.exports = merge(getClientConfig(configOpts), {
     // Additional customizations here
 });
 ```
@@ -84,7 +95,18 @@ const { join } = require('path');
 const merge = require('webpack-merge');
 const getServerConfig = require('vue-ssr-build/build/webpack.server.config');
 
-module.exports = merge(getServerConfig(join(__dirname, '..')), {
+// Configuration options that can be passed to getServerConfig
+const configOpts = {
+    type: 'client',    // required (client|server)
+    rootDir: null,     // required - root directory of the repo, 
+                       // used for aliases
+    i18nBlocks: false, // Boolean - include support for <i18n> blocks 
+                       // in components
+    theme: null,       // Theme for vue-themed-style-loader
+    sassLoaderData: null,  // Data to pass to sass-loader
+};
+
+module.exports = merge(getServerConfig(configOpts), {
     // Additional customizations here
 });
 ```
@@ -124,6 +146,9 @@ export default initializeServer(createApp, {
 
     // Wire up logic for route-level vuex modules?
     vuexModules: true,
+    // Provide a function which will return a promise of all initial 
+    // i18n translations to be included
+    i18nLoader: null,
     // Logger instance
     logger: console
 });
@@ -139,12 +164,16 @@ const app = express();
 const rootPath = path.join(__dirname, '../..');
 app.use('*', vueRenderer(app, {
     // The following are all available options and their default values:
-    // Local build - includes HMR
+    // Local build
     isLocal: process.env.NODE_ENV === 'local',
-    // Dev build - no minification, no HMR
+    // Dev build
     isDev:  process.env.NODE_ENV === 'development',
-    // Prod build - minification, no HMR
+    // Prod build
     isProd:  process.env.NODE_ENV === 'production',
+    // Enable HMR?
+    hmr: false,
+    // Additional options to pass to createBundleRenderer
+    rendererOpts: null,
     // The remaining must be specified as absolute paths:
     templatePath:   path.join(rootDir, 'src/index.tpl.html'),
     clientConfig:   path.join(rootDir, 'build/webpack.client.config.js'),
