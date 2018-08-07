@@ -35,7 +35,7 @@ function createRenderer(bundle, options) {
         runInNewContext: false,
         // Only include the t directive when specified
         ...(t ? { directives: { t } } : {}),
-    }, options.rendererOpts));
+    }, config.rendererOpts));
 }
 
 const handleError = (err, res) => {
