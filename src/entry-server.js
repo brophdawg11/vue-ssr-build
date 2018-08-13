@@ -3,11 +3,12 @@
 
 import { isFunction } from 'lodash-es';
 
-export default function initializeServer(createApp, serverOpts, runtimeConfig) {
+export default function initializeServer(createApp, serverOpts) {
     const opts = Object.assign({
         i18nLoader: null,
         vuexModules: true,
         logger: console,
+        additionalContext: null,
     }, serverOpts);
 
     return context => new Promise((resolve, reject) => {
@@ -59,8 +60,7 @@ export default function initializeServer(createApp, serverOpts, runtimeConfig) {
                     .then(() => Object.assign(context, {
                         initialState: JSON.stringify(store.state),
                         translations: JSON.stringify(translations),
-                        runtimeConfig: JSON.stringify(runtimeConfig),
-                    }))
+                    }, opts.additionalContext))
                     .then(() => resolve(app))
                     .catch((e) => {
                         opts.logger.error('Caught server-side error in fetchData', e);
