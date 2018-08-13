@@ -3,7 +3,7 @@
 
 import { isFunction } from 'lodash-es';
 
-export default function initializeServer(createApp, serverOpts) {
+export default function initializeServer(createApp, serverOpts, runtimeConfig) {
     const opts = Object.assign({
         i18nLoader: null,
         vuexModules: true,
@@ -59,6 +59,7 @@ export default function initializeServer(createApp, serverOpts) {
                     .then(() => Object.assign(context, {
                         initialState: JSON.stringify(store.state),
                         translations: JSON.stringify(translations),
+                        runtimeConfig: JSON.stringify(runtimeConfig),
                     }))
                     .then(() => resolve(app))
                     .catch((e) => {
