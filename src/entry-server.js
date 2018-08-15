@@ -6,6 +6,7 @@ import { isFunction } from 'lodash-es';
 export default function initializeServer(createApp, serverOpts) {
     const opts = Object.assign({
         i18nLoader: null,
+        middleware: () => Promise.resolve(),
         vuexModules: true,
         logger: console,
         additionalContext: null,
@@ -54,7 +55,10 @@ export default function initializeServer(createApp, serverOpts) {
                     store,
                     route: router.currentRoute,
                 });
-                return Promise.all(components.map(fetchData))
+
+                // Execute all provided middleware prior to fetchData
+                return opts.middleware(context, app, router, store)
+                    .then(() => Promise.all(components.map(fetchData)))
                     // Set initialState and translations to be embedded into
                     // the template for client hydration
                     .then(() => Object.assign(context, {
