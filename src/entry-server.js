@@ -19,7 +19,7 @@ export default function initializeServer(createApp, serverOpts) {
                 const components = router.getMatchedComponents();
 
                 if (!components.length) {
-                    opts.logger.warn(`No matched components for route: ${context.req.url}`);
+                    opts.logger.warn(`No matched components for route: ${context.request.url}`);
                     return reject({ code: 404, message: 'Not Found' });
                 }
 

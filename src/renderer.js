@@ -70,8 +70,8 @@ function render(req, res) {
 
     const context = {
         title: 'URBN Community',
-        req,
-        res,
+        request: req,
+        response: res,
         url: req.url,
         initialState: null,
     };
