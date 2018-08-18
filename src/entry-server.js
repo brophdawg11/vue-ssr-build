@@ -1,34 +1,21 @@
 // Server side data loading approach based on:
 // https://ssr.vuejs.org/en/data.html#client-data-fetching
 
-import { isFunction } from 'lodash-es';
-
 export default function initializeServer(createApp, serverOpts) {
     const opts = Object.assign({
-        i18nLoader: null,
-        middleware: () => Promise.resolve(),
         vuexModules: true,
         logger: console,
-        additionalContext: null,
+        preMiddleware: () => Promise.resolve(),
+        postMiddleware: () => Promise.resolve(),
     }, serverOpts);
 
     return context => new Promise((resolve, reject) => {
-
-        function loadTranslations(req, i18nLoader) {
-            return isFunction(i18nLoader) ?
-                i18nLoader(req) :
-                Promise.resolve(null);
-        }
-
-        function initApp(translations) {
+        opts.preMiddleware(context).then(() => {
             // Initialize our app with proper request and translations
-            const { app, router, store } = createApp({
-                request: context.req,
-                response: context.res,
-                translations,
-            });
+            const { app, router, store } = createApp(context);
 
-            function onReady() {
+            router.push(context.url);
+            router.onReady(() => {
                 const components = router.getMatchedComponents();
 
                 if (!components.length) {
@@ -57,28 +44,22 @@ export default function initializeServer(createApp, serverOpts) {
                 });
 
                 // Execute all provided middleware prior to fetchData
-                return opts.middleware(context, app, router, store)
+                return opts.postMiddleware(context, app, router, store)
                     .then(() => Promise.all(components.map(fetchData)))
                     // Set initialState and translations to be embedded into
                     // the template for client hydration
                     .then(() => Object.assign(context, {
                         initialState: JSON.stringify(store.state),
-                        translations: JSON.stringify(translations),
-                    }, opts.additionalContext))
+                    }))
                     .then(() => resolve(app))
                     .catch((e) => {
                         opts.logger.error('Caught server-side error in fetchData', e);
                         return reject(e);
                     });
-            }
-
-            router.push(context.url);
-            router.onReady(onReady, reject);
-        }
-
-        // Load any required translations and then initialize the vua app
-        Promise.resolve()
-            .then(() => loadTranslations(context.req, opts.i18nLoader))
-            .then(translations => initApp(translations));
+            }, (e) => {
+                opts.logger.error('Router rejected onReacy callback');
+                return reject(e);
+            });
+        });
     });
 }
