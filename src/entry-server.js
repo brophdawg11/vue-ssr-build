@@ -6,6 +6,7 @@ export default function initializeServer(createApp, serverOpts) {
         vuexModules: true,
         logger: console,
         preMiddleware: () => Promise.resolve(),
+        middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
     }, serverOpts);
 
@@ -44,8 +45,9 @@ export default function initializeServer(createApp, serverOpts) {
                 });
 
                 // Execute all provided middleware prior to fetchData
-                return opts.postMiddleware(context, app, router, store)
+                return opts.middleware(context, app, router, store)
                     .then(() => Promise.all(components.map(fetchData)))
+                    .then(() => opts.postMiddleware(context, app, router, store))
                     // Set initialState and translations to be embedded into
                     // the template for client hydration
                     .then(() => Object.assign(context, {
