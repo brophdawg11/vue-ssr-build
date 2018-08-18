@@ -7,6 +7,8 @@ export default function initializeClient(createApp, clientOpts) {
         initialState: null,
         initialStateMetaTag: 'initial-state',
         vuexModules: true,
+        middleware: () => Promise.resolve(),
+        postMiddleware: () => Promise.resolve(),
         logger: console,
     }, clientOpts);
 
@@ -79,7 +81,9 @@ export default function initializeClient(createApp, clientOpts) {
             //   https://ssr.vuejs.org/en/data.html#client-data-fetching
             const components = router.getMatchedComponents(to);
             const fetchData = c => c.fetchData && c.fetchData({ store, route: to });
-            return Promise.all(components.map(fetchData))
+            return opts.middleware(to, from, store)
+                .then(() => Promise.all(components.map(fetchData)))
+                .then(() => opts.postMiddleware(to, from, store))
                 .then(() => next())
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing', e);
