@@ -8,6 +8,7 @@ const config = {
     isLocal: process.env.NODE_ENV === 'local',
     isDev: process.env.NODE_ENV === 'development',
     isProd: process.env.NODE_ENV === 'production',
+    stream: true,
     hmr: false,
     i18nDirective: false,
     rendererOpts: null,
@@ -18,13 +19,12 @@ const config = {
     serverBundle: null,
 };
 
-const USE_STREAM = true;
 let renderer;
 let readyPromise;
 
 function createRenderer(bundle, options) {
     /* eslint-disable global-require */
-    const t = options.i18nDirective ?
+    const t = config.i18nDirective ?
         require('vue-i18n-extensions').directive :
         null;
     return createBundleRenderer(bundle, Object.assign(options, {
@@ -38,7 +38,7 @@ function createRenderer(bundle, options) {
     }, config.rendererOpts));
 }
 
-const handleError = (err, res) => {
+const handleError = (err, res, cb) => {
     if (err.url) {
         res.redirect(err.url);
     } else if (err.code === 404) {
@@ -50,19 +50,30 @@ const handleError = (err, res) => {
         console.error(err);
         console.error(err.stack);
     }
+    cb();
 };
 
-function renderToString(context, res) {
+function renderToString(context, res, cb) {
     renderer.renderToString(context,
-        (err, html) => (err ? handleError(err, res) : res.end(html)),
-        e => handleError(e, res));
+        (err, html) => {
+            if (err) {
+                handleError(err, res, cb);
+            } else {
+                res.end(html);
+                cb();
+            }
+        },
+        e => handleError(e, res, cb));
 }
 
-function renderToStream(context, res) {
+function renderToStream(context, res, cb) {
     const stream = renderer.renderToStream(context);
     stream.on('data', data => res.write(data.toString()));
-    stream.on('end', () => res.end());
-    stream.on('error', err => handleError(err, res));
+    stream.on('end', () => {
+        res.end();
+        cb();
+    });
+    stream.on('error', err => handleError(err, res, cb));
 }
 
 function render(req, res) {
@@ -70,8 +81,8 @@ function render(req, res) {
 
     const context = {
         title: 'URBN Community',
-        request: req,
-        response: res,
+        req,
+        res,
         url: req.url,
         initialState: null,
     };
@@ -80,15 +91,12 @@ function render(req, res) {
 
     // Render the appropriate Vue components into the renderer template
     // using the server render logic in entry-server.js
-    if (USE_STREAM) {
-        renderToStream(context, res);
-    } else {
-        renderToString(context, res);
-    }
-
-    if (!config.isProd) {
-        console.log(`Request took: ${Date.now() - s}ms`);
-    }
+    const renderFn = config.stream ? renderToStream : renderToString;
+    renderFn(context, res, () => {
+        if (!config.isProd) {
+            console.log(`SSR request took: ${Date.now() - s}ms`);
+        }
+    });
 }
 
 module.exports = function initVueRenderer(app, configOpts) {
