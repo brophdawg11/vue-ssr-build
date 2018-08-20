@@ -54,10 +54,7 @@ export default function initializeServer(createApp, serverOpts) {
                         initialState: JSON.stringify(store.state),
                     }))
                     .then(() => resolve(app))
-                    .catch((e) => {
-                        opts.logger.error('Caught server-side error in fetchData', e);
-                        return reject(e);
-                    });
+                    .catch(e => reject(e));
             }, (e) => {
                 opts.logger.error('Router rejected onReacy callback');
                 return reject(e);
