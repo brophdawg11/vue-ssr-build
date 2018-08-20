@@ -60,7 +60,7 @@ function renderToString(context, res, cb) {
             if (err) {
                 config.errorHandler(err, res, cb);
             } else {
-                res.end(html);
+                res.send(html);
                 cb();
             }
         },
