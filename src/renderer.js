@@ -3,14 +3,30 @@ const path = require('path');
 const LRU = require('lru-cache');
 const { createBundleRenderer } = require('vue-server-renderer');
 
+const errorHandler = (err, res, cb) => {
+    if (err.url) {
+        res.redirect(err.url);
+    } else if (err.code === 404) {
+        res.status(err.code).send('404 | Page Not Found');
+    } else {
+        // Render Error Page or Redirect
+        res.status(500).send('500 | Internal Server Error');
+        /* eslint-disable no-console */
+        console.error(err);
+        console.error(err.stack);
+    }
+    cb();
+};
+
 // Base config - extended via client argument to initVueRenderer
 const config = {
+    errorHandler,
+    i18nDirective: false,
     isLocal: process.env.NODE_ENV === 'local',
     isDev: process.env.NODE_ENV === 'development',
     isProd: process.env.NODE_ENV === 'production',
-    stream: true,
     hmr: false,
-    i18nDirective: false,
+    stream: true,
     rendererOpts: null,
     templatePath: null,
     clientConfig: null,
@@ -38,32 +54,17 @@ function createRenderer(bundle, options) {
     }, config.rendererOpts));
 }
 
-const handleError = (err, res, cb) => {
-    if (err.url) {
-        res.redirect(err.url);
-    } else if (err.code === 404) {
-        res.status(err.code).send('404 | Page Not Found');
-    } else {
-        // Render Error Page or Redirect
-        res.status(500).send('500 | Internal Server Error');
-        /* eslint-disable no-console */
-        console.error(err);
-        console.error(err.stack);
-    }
-    cb();
-};
-
 function renderToString(context, res, cb) {
     renderer.renderToString(context,
         (err, html) => {
             if (err) {
-                handleError(err, res, cb);
+                config.handleError(err, res, cb);
             } else {
                 res.end(html);
                 cb();
             }
         },
-        e => handleError(e, res, cb));
+        e => config.handleError(e, res, cb));
 }
 
 function renderToStream(context, res, cb) {
@@ -73,7 +74,7 @@ function renderToStream(context, res, cb) {
         res.end();
         cb();
     });
-    stream.on('error', err => handleError(err, res, cb));
+    stream.on('error', err => config.handleError(err, res, cb));
 }
 
 function render(req, res) {
