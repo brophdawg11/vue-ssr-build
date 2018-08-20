@@ -58,13 +58,13 @@ function renderToString(context, res, cb) {
     renderer.renderToString(context,
         (err, html) => {
             if (err) {
-                config.handleError(err, res, cb);
+                config.errorHandler(err, res, cb);
             } else {
                 res.end(html);
                 cb();
             }
         },
-        e => config.handleError(e, res, cb));
+        e => config.errorHandler(e, res, cb));
 }
 
 function renderToStream(context, res, cb) {
@@ -74,7 +74,7 @@ function renderToStream(context, res, cb) {
         res.end();
         cb();
     });
-    stream.on('error', err => config.handleError(err, res, cb));
+    stream.on('error', err => config.errorHandler(err, res, cb));
 }
 
 function render(req, res) {
