@@ -80,7 +80,12 @@ export default function initializeClient(createApp, clientOpts) {
             // loose of an approach, a comprehensive approach is available at:
             //   https://ssr.vuejs.org/en/data.html#client-data-fetching
             const components = router.getMatchedComponents(to);
-            const fetchData = c => c.fetchData && c.fetchData({ store, route: to });
+            const fetchData = c => c.fetchData && c.fetchData({
+                app,
+                route: to,
+                router,
+                store,
+            });
             return opts.middleware(to, from, store)
                 .then(() => Promise.all(components.map(fetchData)))
                 .then(() => opts.postMiddleware(to, from, store))
