@@ -27,6 +27,7 @@ module.exports = function getServerConfig(configOpts) {
     const config = Object.assign({
         type: 'server',
         rootDir: null,
+        extractCss: false,
         i18nBlocks: false,
         theme: null,
         sassLoaderData: null,
