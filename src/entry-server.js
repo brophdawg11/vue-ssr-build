@@ -40,8 +40,10 @@ export default function initializeServer(createApp, serverOpts) {
                 }
 
                 const fetchData = c => c.fetchData && c.fetchData({
-                    store,
+                    app,
                     route: router.currentRoute,
+                    router,
+                    store,
                 });
 
                 // Execute all provided middleware prior to fetchData
