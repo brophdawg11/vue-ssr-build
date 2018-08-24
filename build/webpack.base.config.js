@@ -3,6 +3,7 @@ const path = require('path');
 /* eslint-disable import/no-extraneous-dependencies */
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 /* eslint-enable import/no-extraneous-dependencies */
 
 const isLocal = process.env.NODE_ENV === 'local';
@@ -15,6 +16,29 @@ const environment = isProd ? 'production' : 'development';
 console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`Webpack building for environment: ${environment}`);
 /* eslint-enable no-console */
+
+function getCssLoaders(config) {
+    const cssLoader = {
+        loader: 'css-loader',
+        options: {
+            minimize: isProd,
+        },
+    };
+
+    if (config.type === 'server') {
+        if (config.extractCss) {
+            return ['css-loader/locals'];
+        }
+
+        return ['vue-style-loader', cssLoader];
+    }
+
+    if (config.extractCss) {
+        return [MiniCssExtractPlugin.loader, cssLoader];
+    }
+
+    return ['vue-style-loader', cssLoader];
+}
 
 module.exports = {
     isDev,
@@ -73,26 +97,12 @@ module.exports = {
                     },
                     {
                         test: /\.css$/,
-                        use: [
-                            'vue-style-loader',
-                            {
-                                loader: 'css-loader',
-                                options: {
-                                    minimize: isProd,
-                                },
-                            },
-                        ],
+                        use: getCssLoaders(config),
                     },
                     {
                         test: /\.scss$/,
                         use: [
-                            'vue-style-loader',
-                            {
-                                loader: 'css-loader',
-                                options: {
-                                    minimize: isProd,
-                                },
-                            },
+                            ...getCssLoaders(config),
                             {
                                 loader: 'sass-loader',
                                 ...(config.sassLoaderData ? {
@@ -101,7 +111,6 @@ module.exports = {
                                     },
                                 } : {}),
                             },
-
                         ],
                     },
                     {
@@ -120,6 +129,10 @@ module.exports = {
                     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
                 }),
                 new VueLoaderPlugin(),
+                new MiniCssExtractPlugin({
+                    filename: 'app.css',
+                    chunkFilename: '[name].css',
+                }),
             ],
         };
     },

@@ -12,6 +12,7 @@ module.exports = function getClientConfig(configOpts) {
     const config = Object.assign({
         type: 'client',
         rootDir: null,
+        extractCss: false,
         i18nBlocks: false,
         theme: null,
         sassLoaderData: null,
