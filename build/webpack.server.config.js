@@ -31,7 +31,7 @@ module.exports = function getServerConfig(configOpts) {
         i18nBlocks: false,
         theme: null,
         sassLoaderData: null,
-        babelLoader: false,
+        babelLoader: true,
     }, configOpts);
 
     const serverConfig = merge(getBaseConfig(config), {
