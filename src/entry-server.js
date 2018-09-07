@@ -53,7 +53,15 @@ export default function initializeServer(createApp, serverOpts) {
                     // Set initialState and translations to be embedded into
                     // the template for client hydration
                     .then(() => Object.assign(context, {
-                        initialState: JSON.stringify(store.state),
+                        initialState: JSON.stringify(
+                            store.state,
+                            // Convert all undefined values to null's during stringification.
+                            // Default behavior of JSON.stringify is to strip undefined values,
+                            // which breaks client side hydration because Vue won't make the
+                            // property reactive. See:
+                            //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#Description
+                            (k, v) => (v === undefined ? null : v),
+                        ),
                     }))
                     .then(() => resolve(app))
                     .catch(e => reject(e));
