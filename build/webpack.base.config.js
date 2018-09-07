@@ -90,11 +90,14 @@ module.exports = {
                         loader: '@kazupon/vue-i18n-loader',
                     }] : []),
 
-                    {
+                    // Only include babelLoader if specified - useful to turn
+                    // this off for the server build
+                    ...(config.babelLoader ? [{
                         test: /\.js$/,
                         loader: 'babel-loader',
                         exclude: /node_modules/,
-                    },
+                    }] : []),
+
                     {
                         test: /\.css$/,
                         use: getCssLoaders(config),
