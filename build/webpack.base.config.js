@@ -117,11 +117,22 @@ module.exports = {
                         ],
                     },
                     {
-                        test: /\.(png|jpe?g|gif|ttf|woff2?|eot|svg)$/,
+                        test: /\.(png|jpe?g|gif|ttf|woff2?|eot)$/,
                         use: {
                             loader: 'url-loader',
                             options: {
                                 limit: 8192,
+                            },
+                        },
+                    },
+                    // See: https://iamakulov.com/notes/optimize-images-webpack/
+                    {
+                        test: /\.svg$/,
+                        use: {
+                            loader: 'svg-url-loader',
+                            options: {
+                                limit: 8192,
+                                noquotes: true,
                             },
                         },
                     },
