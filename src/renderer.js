@@ -27,6 +27,9 @@ const config = {
     isProd: process.env.NODE_ENV === 'production',
     hmr: false,
     stream: true,
+    componentCacheDebug: false,
+    componentCacheMaxAge: 15 * 60 * 1000,
+    componentCacheMaxSize: 1024 * 1024,
     rendererOpts: null,
     templatePath: null,
     clientConfig: null,
@@ -35,6 +38,7 @@ const config = {
     serverBundle: null,
 };
 
+let cache;
 let renderer;
 let readyPromise;
 
@@ -43,11 +47,40 @@ function createRenderer(bundle, options) {
     const t = config.i18nDirective ?
         require('vue-i18n-extensions').directive :
         null;
+
+    if (cache) {
+        console.log(
+            'Recreating the Vue SSR BundleRenderer, clearing the component cache',
+            'and re-creating',
+        );
+        cache.reset();
+        cache = null;
+    }
+
+    const prettySize = Math.round(config.componentCacheMaxSize / 1024);
+    const prettyAge = Math.round(config.componentCacheMaxAge / 1000);
+    console.log(`Creating component cache: maxSize ${prettySize}Kb, maxAge ${prettyAge}s`);
+    cache = LRU({
+        length(n, key) {
+            // Vue components come in as an object with an html key containing
+            // the SSR output
+            const valid = (
+                n != null &&
+                n.html != null &&
+                typeof n.html.length === 'number'
+            );
+            const length = valid ? n.html.length : 1;
+            if (config.componentCacheDebug) {
+                console.log(`Adding component cache entry: key=${key}, length=${length}`);
+            }
+            return length;
+        },
+        max: config.componentCacheMaxSize,
+        maxAge: config.componentCacheMaxAge,
+    });
+
     return createBundleRenderer(bundle, Object.assign(options, {
-        cache: LRU({
-            max: 1000,
-            maxAge: 1000 * 60 * 15,
-        }),
+        cache,
         runInNewContext: false,
         // Only include the t directive when specified
         ...(t ? { directives: { t } } : {}),
@@ -94,6 +127,11 @@ function render(req, res) {
     // using the server render logic in entry-server.js
     const renderFn = config.stream ? renderToStream : renderToString;
     renderFn(context, res, () => {
+        if (config.componentCacheDebug) {
+            console.log('Component cache stats:');
+            console.log('  length:', cache.length);
+            console.log('  keys:', cache.keys().join(','));
+        }
         if (!config.isProd) {
             console.log(`SSR request took: ${Date.now() - s}ms`);
         }
