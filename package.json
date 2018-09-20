@@ -37,6 +37,7 @@
     "mini-css-extract-plugin": "0.4.2",
     "node-sass": "4.9.2",
     "sass-loader": "7.1.0",
+    "svg-inline-loader": "0.8.0",
     "svg-url-loader": "2.3.2",
     "vue": "2.5.17",
     "vue-i18n": "8.0.0",
