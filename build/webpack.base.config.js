@@ -125,16 +125,22 @@ module.exports = {
                             },
                         },
                     },
-                    // See: https://iamakulov.com/notes/optimize-images-webpack/
                     {
                         test: /\.svg$/,
-                        use: {
-                            loader: 'svg-url-loader',
-                            options: {
-                                limit: 8192,
-                                noquotes: true,
+                        oneOf: [{
+                            resourceQuery: /inline/,
+                            use: 'svg-inline-loader',
+                        }, {
+                            test: /\.svg$/,
+                            use: {
+                                // See: https://iamakulov.com/notes/optimize-images-webpack/
+                                loader: 'svg-url-loader',
+                                options: {
+                                    limit: 8192,
+                                    noquotes: true,
+                                },
                             },
-                        },
+                        }],
                     },
                 ],
             },
