@@ -154,7 +154,7 @@ module.exports = function initVueRenderer(app, configOpts) {
         );
         return (req, res) => {
             // Make dev server wait on webpack builds
-            readyPromise.then(() => render(req, res));
+            readyPromise.then(({ clientManifest }) => render(clientManifest, req, res));
         };
     }
 
