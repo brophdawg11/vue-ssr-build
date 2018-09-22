@@ -165,8 +165,8 @@ module.exports = {
                 }),
                 new VueLoaderPlugin(),
                 new MiniCssExtractPlugin({
-                    filename: 'app.css',
-                    chunkFilename: '[name].css',
+                    filename: isProd ? 'app.[contenthash].css' : 'app.css',
+                    chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
                 }),
             ],
         };
