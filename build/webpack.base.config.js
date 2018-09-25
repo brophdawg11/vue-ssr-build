@@ -4,6 +4,8 @@ const path = require('path');
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 /* eslint-enable import/no-extraneous-dependencies */
 
 const isLocal = process.env.NODE_ENV === 'local';
@@ -144,14 +146,27 @@ module.exports = {
                     },
                 ],
             },
+            ...(config.extractCss && config.isProd ? {
+                optimization: {
+                    minimizer: [
+                        new UglifyJsPlugin({
+                            cache: true,
+                            parallel: true,
+                            sourceMap: true,
+                        }),
+                        // Minimize extracted CSS files
+                        new OptimizeCSSAssetsPlugin({}),
+                    ],
+                },
+            } : {}),
             plugins: [
                 new webpack.DefinePlugin({
                     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
                 }),
                 new VueLoaderPlugin(),
                 new MiniCssExtractPlugin({
-                    filename: 'app.css',
-                    chunkFilename: '[name].css',
+                    filename: isProd ? 'app.[contenthash].css' : 'app.css',
+                    chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
                 }),
             ],
         };

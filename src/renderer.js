@@ -110,14 +110,17 @@ function renderToStream(context, res, cb) {
     stream.on('error', err => config.errorHandler(err, res, cb));
 }
 
-function render(req, res) {
+function render(clientManifest, req, res) {
     const s = Date.now();
+
+    console.log('\n\nVue request started', new Date().toISOString());
 
     const context = {
         title: 'URBN Community',
         request: req,
         response: res,
         url: req.url,
+        clientManifest,
         initialState: null,
     };
 
@@ -132,9 +135,8 @@ function render(req, res) {
             console.log('  length:', cache.length);
             console.log('  keys:', cache.keys().join(','));
         }
-        if (!config.isProd) {
-            console.log(`SSR request took: ${Date.now() - s}ms`);
-        }
+        console.log('Vue request ended', new Date().toISOString());
+        console.log(`SSR request took: ${Date.now() - s}ms`);
     });
 }
 
@@ -152,7 +154,7 @@ module.exports = function initVueRenderer(app, configOpts) {
         );
         return (req, res) => {
             // Make dev server wait on webpack builds
-            readyPromise.then(() => render(req, res));
+            readyPromise.then(({ clientManifest }) => render(clientManifest, req, res));
         };
     }
 
@@ -160,6 +162,7 @@ module.exports = function initVueRenderer(app, configOpts) {
     const template = fs.readFileSync(config.templatePath, 'utf-8');
     const bundle = require(path.resolve(config.serverBundle));
     const clientManifest = require(path.resolve(config.clientManifest));
+
     renderer = createRenderer(bundle, { template, clientManifest });
-    return render;
+    return (req, res) => render(clientManifest, req, res);
 };
