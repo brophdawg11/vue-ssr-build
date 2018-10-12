@@ -10,8 +10,9 @@ export default function initializeServer(createApp, serverOpts) {
         postMiddleware: () => Promise.resolve(),
     }, serverOpts);
 
-    return context => new Promise((resolve, reject) => {
-        opts.preMiddleware(context).then(() => {
+    return context => new Promise((resolve, reject) => Promise.resolve()
+        .then(() => opts.preMiddleware(context))
+        .then(() => {
             // Initialize our app with proper request and translations
             const { app, router, store } = createApp(context);
 
@@ -32,7 +33,10 @@ export default function initializeServer(createApp, serverOpts) {
                     components
                         .filter(c => 'vuex' in c)
                         .forEach((c) => {
-                            opts.logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
+                            opts.logger.info(
+                                'Registering dynamic Vuex module:',
+                                c.vuex.moduleName,
+                            );
                             store.registerModule(c.vuex.moduleName, c.vuex.module, {
                                 preserveState: store.state[c.vuex.moduleName] != null,
                             });
@@ -47,7 +51,8 @@ export default function initializeServer(createApp, serverOpts) {
                 });
 
                 // Execute all provided middleware prior to fetchData
-                return opts.middleware(context, app, router, store)
+                return Promise.resolve()
+                    .then(() => opts.middleware(context, app, router, store))
                     .then(() => Promise.all(components.map(fetchData)))
                     .then(() => opts.postMiddleware(context, app, router, store))
                     // Set initialState and translations to be embedded into
@@ -64,11 +69,20 @@ export default function initializeServer(createApp, serverOpts) {
                         ),
                     }))
                     .then(() => resolve(app))
-                    .catch(e => reject(e));
+                    .catch((e) => {
+                        opts.logger.error('Error in middleware chain');
+                        opts.logger.error(e);
+                        return reject(e || new Error('Unknown Error from middleware'));
+                    });
             }, (e) => {
-                opts.logger.error('Router rejected onReacy callback');
-                return reject(e);
+                opts.logger.error('Router rejected onReady callback');
+                opts.logger.error(e);
+                return reject(e || new Error('Unknown Error from onReady'));
             });
-        });
-    });
+        })
+        .catch((e) => {
+            opts.logger.error('Error in preMiddleware chain');
+            opts.logger.error(e);
+            return reject(e || new Error('Unknown Error from preMiddleware'));
+        }));
 }
