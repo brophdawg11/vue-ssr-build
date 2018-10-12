@@ -93,7 +93,7 @@ export default function initializeClient(createApp, clientOpts) {
                 .then(() => next())
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');
-                    opts.logger.debug(e);
+                    opts.logger.error(e);
                     if (e instanceof Error) {
                         next(e);
                     } else {

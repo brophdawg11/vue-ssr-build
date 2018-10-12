@@ -71,15 +71,18 @@ export default function initializeServer(createApp, serverOpts) {
                     .then(() => resolve(app))
                     .catch((e) => {
                         opts.logger.error('Error in middleware chain');
+                        opts.logger.error(e);
                         return reject(e || new Error('Unknown Error from middleware'));
                     });
             }, (e) => {
                 opts.logger.error('Router rejected onReady callback');
+                opts.logger.error(e);
                 return reject(e || new Error('Unknown Error from onReady'));
             });
         })
         .catch((e) => {
             opts.logger.error('Error in preMiddleware chain');
+            opts.logger.error(e);
             return reject(e || new Error('Unknown Error from preMiddleware'));
         }));
 }
