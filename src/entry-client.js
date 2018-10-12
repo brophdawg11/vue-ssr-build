@@ -86,7 +86,8 @@ export default function initializeClient(createApp, clientOpts) {
                 router,
                 store,
             });
-            return opts.middleware(to, from, store)
+            return Promise.resolve()
+                .then(() => opts.middleware(to, from, store))
                 .then(() => Promise.all(components.map(fetchData)))
                 .then(() => opts.postMiddleware(to, from, store))
                 .then(() => next())
