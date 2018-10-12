@@ -69,14 +69,17 @@ export default function initializeServer(createApp, serverOpts) {
                         ),
                     }))
                     .then(() => resolve(app))
-                    .catch(e => reject(e));
+                    .catch((e) => {
+                        opts.logger.error('Error in middleware chain');
+                        return reject(e || new Error('Unknown Error from middleware'));
+                    });
             }, (e) => {
-                opts.logger.error('Router rejected onReacy callback');
-                return reject(e);
+                opts.logger.error('Router rejected onReady callback');
+                return reject(e || new Error('Unknown Error from onReady'));
             });
         })
         .catch((e) => {
             opts.logger.error('Error in preMiddleware chain');
-            return reject(e);
+            return reject(e || new Error('Unknown Error from preMiddleware'));
         }));
 }
