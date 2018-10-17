@@ -51,24 +51,19 @@ export default function initializeClient(createApp, clientOpts) {
                     .filter(c => 'vuex' in c)
                     .forEach((c) => {
                         const name = getModuleName(c, to);
-
-                        // Short circuit if we already have this module
-                        const mod = find(registeredModules, { name });
-                        if (mod) {
-                            // Update the timestamp to mark this module as recent
-                            mod.index = moduleIndex++;
-                            opts.logger.info(
-                                'Skipping duplicate Vuex module registration:',
-                                name,
-                            );
-                            return;
+                        const existingModule = find(registeredModules, { name });
+                        if (existingModule) {
+                            // We already have this module registered, update the
+                            // index to mark it as recent
+                            opts.logger.info('Skipping duplicate Vuex module registration:', name);
+                            existingModule.index = moduleIndex++;
+                        } else {
+                            opts.logger.info('Registering dynamic Vuex module:', name);
+                            store.registerModule(name, c.vuex.module, {
+                                preserveState: store.state[name] != null,
+                            });
+                            registeredModules.push({ name, index: moduleIndex++ });
                         }
-
-                        opts.logger.info('Registering dynamic Vuex module:', name);
-                        store.registerModule(name, c.vuex.module, {
-                            preserveState: store.state[name] != null,
-                        });
-                        registeredModules.push({ name, index: moduleIndex++ });
                     });
 
                 next();
