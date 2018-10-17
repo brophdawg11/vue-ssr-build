@@ -7,7 +7,7 @@ export default function initializeClient(createApp, clientOpts) {
         initialState: null,
         initialStateMetaTag: 'initial-state',
         vuexModules: true,
-        maxVuexModules: 5,
+        maxVuexModules: 2,
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
