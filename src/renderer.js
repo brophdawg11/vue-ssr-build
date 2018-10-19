@@ -164,5 +164,7 @@ module.exports = function initVueRenderer(app, configOpts) {
     const clientManifest = require(path.resolve(config.clientManifest));
 
     renderer = createRenderer(bundle, { template, clientManifest });
-    return (req, res) => render(clientManifest, req, res);
+    return function renderVueRoute(req, res) {
+        return render(clientManifest, req, res);
+    };
 };
