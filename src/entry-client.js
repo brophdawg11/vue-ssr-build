@@ -1,4 +1,4 @@
-import { includes, isString } from 'lodash-es';
+import { find, isString } from 'lodash-es';
 
 export default function initializeClient(createApp, clientOpts) {
     const opts = Object.assign({
@@ -7,6 +7,7 @@ export default function initializeClient(createApp, clientOpts) {
         initialState: null,
         initialStateMetaTag: 'initial-state',
         vuexModules: true,
+        maxVuexModules: 2,
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
@@ -32,35 +33,76 @@ export default function initializeClient(createApp, clientOpts) {
         // dynamic modules until Vuex implements a hasModule() type method.  See:
         //   https://github.com/vuejs/vuex/issues/833
         //   https://github.com/vuejs/vuex/pull/834
-        const registeredModules = {};
+        const registeredModules = [];
+        let moduleIndex = 0;
+
+        // Allow a function to be passed that can generate a route-aware
+        // module name
+        const getModuleName = (c, route) => (
+            typeof c.vuex.moduleName === 'function' ?
+                c.vuex.moduleName(route) :
+                c.vuex.moduleName
+        );
 
         // Before routing, register any dynamic Vuex modules for new components
         router.beforeResolve((to, from, next) => {
-            router.getMatchedComponents(to)
-                .filter(c => 'vuex' in c && !registeredModules[c.vuex.moduleName])
-                .forEach((c) => {
-                    opts.logger.info('Registering dynamic Vuex module:', c.vuex.moduleName);
-                    store.registerModule(c.vuex.moduleName, c.vuex.module, {
-                        preserveState: store.state[c.vuex.moduleName] != null,
+            try {
+                router.getMatchedComponents(to)
+                    .filter(c => 'vuex' in c)
+                    .forEach((c) => {
+                        const name = getModuleName(c, to);
+                        const existingModule = find(registeredModules, { name });
+                        if (existingModule) {
+                            // We already have this module registered, update the
+                            // index to mark it as recent
+                            opts.logger.info('Skipping duplicate Vuex module registration:', name);
+                            existingModule.index = moduleIndex++;
+                        } else {
+                            opts.logger.info('Registering dynamic Vuex module:', name);
+                            store.registerModule(name, c.vuex.module, {
+                                preserveState: store.state[name] != null,
+                            });
+                            registeredModules.push({ name, index: moduleIndex++ });
+                        }
                     });
-                    registeredModules[c.vuex.moduleName] = true;
-                });
-            next();
+
+                next();
+            } catch (e) {
+                opts.logger.error('Caught error during beforeResolve', e);
+                // Prevent routing
+                next(e || false);
+            }
         });
 
         // After routing, unregister any dynamic Vuex modules from prior components
         router.afterEach((to, from) => {
-            const components = router.getMatchedComponents(to);
             const priorComponents = router.getMatchedComponents(from);
 
             priorComponents
-                .filter(c => !includes(components, c) &&
-                             'vuex' in c &&
-                             registeredModules[c.vuex.moduleName])
+                .filter(c => 'vuex' in c)
                 .forEach((c) => {
-                    opts.logger.info('Unregistering dynamic Vuex module:', c.vuex.moduleName);
-                    store.unregisterModule(c.vuex.moduleName);
-                    registeredModules[c.vuex.moduleName] = false;
+                    const fromModuleName = getModuleName(c, from);
+                    const toModuleName = getModuleName(c, to);
+
+                    // After every routing operation, perform available cleanup
+                    // of registered modules, keeping around up to a specified
+                    // maximum
+                    const minIndex = Math.max(moduleIndex - opts.maxVuexModules, 0);
+                    registeredModules.forEach((m, idx) => {
+                        if (m.index < minIndex) {
+                            if (m.name !== toModuleName && m.name !== fromModuleName) {
+                                opts.logger.info('Unregistering dynamic Vuex module:', m.name);
+                                store.unregisterModule(m.name);
+                                registeredModules.splice(idx, 1);
+                            } else {
+                                // Not ready to be removed yet, still actively used
+                                opts.logger.info(
+                                    'Skipping deregistration for active Vuex module:',
+                                    m.name,
+                                );
+                            }
+                        }
+                    });
                 });
         });
     }
