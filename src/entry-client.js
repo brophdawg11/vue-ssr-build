@@ -138,8 +138,14 @@ export default function initializeClient(createApp, clientOpts) {
                     opts.logger.error(e);
                     if (e instanceof Error) {
                         next(e);
+                    } else if (typeof e === 'string') {
+                        next(new Error(e));
                     } else {
-                        next(false);
+                        try {
+                            next(new Error(JSON.stringify(e)));
+                        } catch (e2) {
+                            next(new Error('Unknown routing error'));
+                        }
                     }
                 });
         });
