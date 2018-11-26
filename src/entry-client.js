@@ -13,9 +13,12 @@ export default function initializeClient(createApp, clientOpts) {
         logger: console,
     }, clientOpts);
 
-    let initialState = null;
+    let { initialState } = opts;
 
     if (isString(opts.initialStateMetaTag)) {
+        if (initialState) {
+            opts.logger.error('initialState and initialStateMetaTag should not be used together');
+        }
         try {
             const meta = document.querySelector(`meta[name="${opts.initialStateMetaTag}"]`);
             initialState = JSON.parse(meta.getAttribute('content'));

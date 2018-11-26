@@ -51,16 +51,20 @@ module.exports = function setupDevServer(app, config, cb) {
         update();
     });
 
-    // modify client config to work with hot middleware
-    clientConfig.entry.app = [
-        'webpack-hot-middleware/client',
-        clientConfig.entry.app,
-    ];
-    clientConfig.output.filename = '[name].js';
-    clientConfig.plugins.push(
-        new webpack.HotModuleReplacementPlugin(),
-        new webpack.NoEmitOnErrorsPlugin(),
-    );
+    // Modify client config to work with hot middleware.  Only do this once in
+    // the case of multiple renderers
+    if (clientConfig.entry.app && clientConfig.entry.app[0] !== 'webpack-hot-middleware/client') {
+        clientConfig.entry.app = [
+            'webpack-hot-middleware/client',
+            clientConfig.entry.app,
+        ];
+        clientConfig.output.filename = '[name].js';
+        clientConfig.plugins.push(
+            new webpack.HotModuleReplacementPlugin(),
+            new webpack.NoEmitOnErrorsPlugin(),
+        );
+    }
+
 
     // dev middleware
     console.error('Launching client webpack build');
