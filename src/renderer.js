@@ -40,9 +40,11 @@ const defaults = {
     serverBundle: null,
 };
 
+const configs = {};
 const caches = {};
 const renderers = {};
-const readyPromises = {};
+
+let readyPromise;
 
 function createRenderer(bundle, options, config) {
     const t = config.i18nDirective ?
@@ -145,6 +147,7 @@ function render(config, clientManifest, req, res) {
 
 module.exports = function initVueRenderer(app, configOpts) {
     const config = Object.assign({}, defaults, configOpts);
+    configs[config.name] = config;
 
     if (renderers[config.name]) {
         console.error(`[ERROR] There already exists a "${config.name}" renderer, overwriting...`);
@@ -155,17 +158,20 @@ module.exports = function initVueRenderer(app, configOpts) {
     // In development: setup the dev server with watch and hot-reload,
     // and create a new renderer on bundle / index template update.
     if (config.hmr) {
-        readyPromises[config.name] = require('./setup-dev-server')(
-            app,
-            config,
-            (bundle, options) => {
-                renderers[config.name] = createRenderer(bundle, options, config);
-            },
-        );
+        if (!readyPromise) {
+            readyPromise = require('./setup-dev-server')(
+                app,
+                config,
+                (bundle, options) => {
+                    Object.keys(configs).forEach((k) => {
+                        renderers[k] = createRenderer(bundle, options, configs[k]);
+                    });
+                },
+            );
+        }
         return (req, res) => {
             // Make dev server wait on webpack builds
-            readyPromises[config.name]
-                .then(({ clientManifest }) => render(config, clientManifest, req, res));
+            readyPromise.then(({ clientManifest }) => render(config, clientManifest, req, res));
         };
     }
 
