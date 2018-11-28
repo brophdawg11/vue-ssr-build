@@ -158,17 +158,38 @@ module.exports = function initVueRenderer(app, configOpts) {
     // In development: setup the dev server with watch and hot-reload,
     // and create a new renderer on bundle / index template update.
     if (config.hmr) {
-        if (!readyPromise) {
+        // We should only run one webpack HMR process at a time, since our renderers use
+        // the same client/server builds, and really just differ by template.  This means
+        // that template changes for non-default renders will not be picked up by the HMR
+        // (unless a default template change is made)
+        if (config.name === 'default') {
             readyPromise = require('./setup-dev-server')(
                 app,
                 config,
                 (bundle, options) => {
+                    // When we receive an update, we re-create all renderers
                     Object.keys(configs).forEach((k) => {
-                        renderers[k] = createRenderer(bundle, options, configs[k]);
+                        console.log(`HMR: Creating "${k}" renderer`);
+                        if (k === 'default') {
+                            renderers[k] = createRenderer(bundle, options, configs[k]);
+                        } else {
+                            // But we load the proper teplate for non-default renderers
+                            console.log('Re-loading non-default template');
+                            const newOptions = Object.assign({}, options, {
+                                template: fs.readFileSync(configs[k].templatePath, 'utf-8'),
+                            });
+                            renderers[k] = createRenderer(bundle, newOptions, configs[k]);
+                        }
                     });
                 },
             );
+        } else {
+            console.warn(
+                `Skipping HMR setup for "${config.name}" renderer.  Make sure you`,
+                'have a "default" renderer to enable HMR',
+            );
         }
+
         return (req, res) => {
             // Make dev server wait on webpack builds
             readyPromise.then(({ clientManifest }) => render(config, clientManifest, req, res));
