@@ -76,9 +76,9 @@ const getClientConfig = require('vue-ssr-build/build/webpack.client.config');
 // Configuration options that can be passed to getClientConfig
 const configOpts = {
     type: 'client',    // required (client|server)
-    rootDir: null,     // required - root directory of the repo, 
+    rootDir: null,     // required - root directory of the repo,
                        // used for aliases
-    i18nBlocks: false, // Boolean - include support for <i18n> blocks 
+    i18nBlocks: false, // Boolean - include support for <i18n> blocks
                        // in components
     theme: null,       // Theme for vue-themed-style-loader
     sassLoaderData: null,  // Data to pass to sass-loader
@@ -98,9 +98,9 @@ const getServerConfig = require('vue-ssr-build/build/webpack.server.config');
 // Configuration options that can be passed to getServerConfig
 const configOpts = {
     type: 'client',    // required (client|server)
-    rootDir: null,     // required - root directory of the repo, 
+    rootDir: null,     // required - root directory of the repo,
                        // used for aliases
-    i18nBlocks: false, // Boolean - include support for <i18n> blocks 
+    i18nBlocks: false, // Boolean - include support for <i18n> blocks
                        // in components
     theme: null,       // Theme for vue-themed-style-loader
     sassLoaderData: null,  // Data to pass to sass-loader
@@ -146,7 +146,7 @@ export default initializeServer(createApp, {
 
     // Wire up logic for route-level vuex modules?
     vuexModules: true,
-    // Provide a function which will return a promise of all initial 
+    // Provide a function which will return a promise of all initial
     // i18n translations to be included
     i18nLoader: null,
     // Logger instance
@@ -185,7 +185,11 @@ app.use('*', vueRenderer(app, {
 
 #### Babel, ESLint, Jest Configurations
 
-For ease of use, this repository also provides `.babelrc.js`, `.eslintrc.js` and `jest.config.js` files that should work with the default configurations.  Simply import them into your configs an extend as needed.
+For ease of use, this repository also provides `.babelrc.js`, `.eslintrc.js` and `jest.config.js` files that should work with the default configurations.  Simply import them into your configs and extend as needed.
+
+#### Post CSS, Autoprefixer
+
+TODO
 
 #### Folder structure
 
