@@ -19,27 +19,33 @@ console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`Webpack building for environment: ${environment}`);
 /* eslint-enable no-console */
 
-function getCssLoaders(config) {
+function getCssLoaders(config, loadersAfterCssLoader = 0) {
+    // Account for loaders after CSS Loader and postcss-loader
+    const importLoaders = loadersAfterCssLoader + 1;
     const cssLoader = {
         loader: 'css-loader',
         options: {
             minimize: isProd,
+            // Number of loaders applied prior to css-loader
+            // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
+            importLoaders,
         },
     };
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            return ['css-loader/locals'];
+            cssLoader.loader = 'css-loader/locals';
+            return [cssLoader, 'postcss-loader'];
         }
 
-        return ['vue-style-loader', cssLoader];
+        return ['vue-style-loader', cssLoader, 'postcss-loader'];
     }
 
     if (config.extractCss) {
-        return [MiniCssExtractPlugin.loader, cssLoader];
+        return [MiniCssExtractPlugin.loader, cssLoader, 'postcss-loader'];
     }
 
-    return ['vue-style-loader', cssLoader];
+    return ['vue-style-loader', cssLoader, 'postcss-loader'];
 }
 
 module.exports = {
@@ -107,7 +113,7 @@ module.exports = {
                     {
                         test: /\.scss$/,
                         use: [
-                            ...getCssLoaders(config),
+                            ...getCssLoaders(config, 1),
                             {
                                 loader: 'sass-loader',
                                 ...(config.sassLoaderData ? {
