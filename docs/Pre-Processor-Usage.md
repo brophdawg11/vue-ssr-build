@@ -46,4 +46,4 @@ safari >= 8
 ios_saf >= 8
 ```
 
-See the [Browserslist docs](https://github.com/ai/browserslist#queries) for queries, browser names, config format, and defaults.
+See the [Browserslist Docs](https://github.com/ai/browserslist#queries) for queries, browser names, config format, and defaults.
