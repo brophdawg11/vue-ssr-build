@@ -13,6 +13,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const isDev = !isLocal && !isProd;
 const logLevel = process.env.LOG_LEVEL || 'debug';
 const environment = isProd ? 'production' : 'development';
+const autoprefixerEnabled = process.env.CSS_AUTOPREFIXER_ENABLED === 'true';
 
 /* eslint-disable no-console */
 console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
@@ -20,8 +21,15 @@ console.log(`Webpack building for environment: ${environment}`);
 /* eslint-enable no-console */
 
 function getCssLoaders(config, loadersAfterCssLoader = 0) {
+    const postCSSLoader = [];
+
+    // Only add postcss-loader if it's enabled
+    if (autoprefixerEnabled) {
+        postCSSLoader.push('postcss-loader');
+    }
+
     // Account for loaders after CSS Loader and postcss-loader
-    const importLoaders = loadersAfterCssLoader + 1;
+    const importLoaders = loadersAfterCssLoader + (postCSSLoader.length ? 1 : 0);
     const cssLoader = {
         loader: 'css-loader',
         options: {
@@ -35,17 +43,17 @@ function getCssLoaders(config, loadersAfterCssLoader = 0) {
     if (config.type === 'server') {
         if (config.extractCss) {
             cssLoader.loader = 'css-loader/locals';
-            return [cssLoader, 'postcss-loader'];
+            return [cssLoader, ...postCSSLoader];
         }
 
-        return ['vue-style-loader', cssLoader, 'postcss-loader'];
+        return ['vue-style-loader', cssLoader, ...postCSSLoader];
     }
 
     if (config.extractCss) {
-        return [MiniCssExtractPlugin.loader, cssLoader, 'postcss-loader'];
+        return [MiniCssExtractPlugin.loader, cssLoader, ...postCSSLoader];
     }
 
-    return ['vue-style-loader', cssLoader, 'postcss-loader'];
+    return ['vue-style-loader', cssLoader, ...postCSSLoader];
 }
 
 module.exports = {
