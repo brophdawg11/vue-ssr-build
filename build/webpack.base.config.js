@@ -18,6 +18,7 @@ const autoprefixerEnabled = process.env.CSS_AUTOPREFIXER_ENABLED === 'true';
 /* eslint-disable no-console */
 console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`Webpack building for environment: ${environment}`);
+console.log(`CSS Autoprefixer: ${autoprefixerEnabled ? 'ENABLED' : 'DISABLED'}`);
 /* eslint-enable no-console */
 
 function getCssLoaders(config, loadersAfterCssLoader = 0) {
