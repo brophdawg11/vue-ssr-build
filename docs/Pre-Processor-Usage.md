@@ -7,13 +7,12 @@ We make use of various preprocessors to add functionality. Most notably:
     * [Autoprefixer](https://github.com/postcss/autoprefixer) to add vendor prefixes to CSS rules
 * [Sass Loader](https://github.com/webpack-contrib/sass-loader) to compile `.scss` files to CSS
 
-### CSS Autoprefixer
+### Enabling/Configuring CSS Autoprefixer
 
-@TODO
+In order to use the CSS Autoprefixer, two steps are required:
 
-#### Enabling/Configuring Autoprefixer
-
-Each project must have a `postcss.config.js` file and a `.browserslistrc` file if autoprefixing is enabled. Create one of each in the root of the project and extend as needed.
+* `CSS_AUTOPREFIXER_ENABLED=true` must be set as a build time environment variable or the `postcss-loader` will not be added to webpack
+*  There must be a `postcss.config.js` file and a `.browserslistrc` file in the root of the project
 
 ##### `postcss.config.js`
 
