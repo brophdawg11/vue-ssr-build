@@ -18,9 +18,11 @@ Each project must have a `postcss.config.js` file and a `.browserslistrc` file i
 ##### `postcss.config.js`
 
 ```
-const basePostCssConfig = require('vue-ssr-build/postcss.config.js');
-
-module.exports = basePostCssConfig;
+module.exports = {
+    plugins: [
+        require('autoprefixer'),
+    ],
+};
 ```
 
 If you need to customize the options being passed to the Autoprefixer, you'll need to override this file with the following:
