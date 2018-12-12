@@ -13,7 +13,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const isDev = !isLocal && !isProd;
 const logLevel = process.env.LOG_LEVEL || 'debug';
 const environment = isProd ? 'production' : 'development';
-const autoprefixerEnabled = process.env.CSS_AUTOPREFIXER_ENABLED === 'true';
+const autoprefixerEnabled = process.env.VSB_CSS_AUTOPREFIXER_ENABLED === 'true';
 
 /* eslint-disable no-console */
 console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);

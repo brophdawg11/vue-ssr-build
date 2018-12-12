@@ -11,7 +11,7 @@ We make use of various preprocessors to add functionality. Most notably:
 
 In order to use the CSS Autoprefixer, two steps are required:
 
-* `CSS_AUTOPREFIXER_ENABLED=true` must be set as a build time environment variable or the `postcss-loader` will not be added to webpack
+* `VSB_CSS_AUTOPREFIXER_ENABLED=true` must be set as a build time environment variable or the `postcss-loader` will not be added to webpack
 *  There must be a `postcss.config.js` file and a `.browserslistrc` file in the root of the project
 
 ##### `postcss.config.js`
