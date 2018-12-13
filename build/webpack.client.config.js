@@ -13,6 +13,8 @@ module.exports = function getClientConfig(configOpts) {
         type: 'client',
         rootDir: null,
         extractCss: false,
+        enablePostCss: false,
+        postCssOpts: null,
         i18nBlocks: false,
         theme: null,
         sassLoaderData: null,

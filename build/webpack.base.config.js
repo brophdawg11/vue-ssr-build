@@ -1,60 +1,59 @@
+/* eslint-disable no-console, import/no-extraneous-dependencies */
+
 const path = require('path');
 
-/* eslint-disable import/no-extraneous-dependencies */
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-/* eslint-enable import/no-extraneous-dependencies */
 
 const isLocal = process.env.NODE_ENV === 'local';
 const isProd = process.env.NODE_ENV === 'production';
 const isDev = !isLocal && !isProd;
 const logLevel = process.env.LOG_LEVEL || 'debug';
 const environment = isProd ? 'production' : 'development';
-const autoprefixerEnabled = process.env.VSB_CSS_AUTOPREFIXER_ENABLED === 'true';
 
-/* eslint-disable no-console */
 console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`Webpack building for environment: ${environment}`);
-console.log(`CSS Autoprefixer: ${autoprefixerEnabled ? 'ENABLED' : 'DISABLED'}`);
-/* eslint-enable no-console */
 
-function getCssLoaders(config, loadersAfterCssLoader = 0) {
-    const postCSSLoader = [];
+function getCssLoaders(config) {
+    console.log(`Enable PostCSS: ${config.enablePostCss}`);
 
-    // Only add postcss-loader if it's enabled
-    if (autoprefixerEnabled) {
-        postCSSLoader.push('postcss-loader');
-    }
+    const addlLoaders = [
+        ...(config.enablePostCss ? [{
+            loader: 'postcss-loader',
+            options: config.postCssOpts,
+        }] : []),
+    ];
 
-    // Account for loaders after CSS Loader and postcss-loader
-    const importLoaders = loadersAfterCssLoader + (postCSSLoader.length ? 1 : 0);
-    const cssLoader = {
-        loader: 'css-loader',
-        options: {
-            minimize: isProd,
-            // Number of loaders applied prior to css-loader
-            // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
-            importLoaders,
+    const cssLoaders = [
+        {
+            loader: 'css-loader',
+            options: {
+                minimize: isProd,
+                // Number of loaders applied prior to css-loader
+                // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
+                importLoaders: addlLoaders.length,
+            },
         },
-    };
+        ...addlLoaders,
+    ];
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            cssLoader.loader = 'css-loader/locals';
-            return [cssLoader, ...postCSSLoader];
+            cssLoaders[0].loader = 'css-loader/locals';
+            return [...cssLoaders];
         }
 
-        return ['vue-style-loader', cssLoader, ...postCSSLoader];
+        return ['vue-style-loader', ...cssLoaders];
     }
 
     if (config.extractCss) {
-        return [MiniCssExtractPlugin.loader, cssLoader, ...postCSSLoader];
+        return [MiniCssExtractPlugin.loader, ...cssLoaders];
     }
 
-    return ['vue-style-loader', cssLoader, ...postCSSLoader];
+    return ['vue-style-loader', ...cssLoaders];
 }
 
 module.exports = {
@@ -122,7 +121,7 @@ module.exports = {
                     {
                         test: /\.scss$/,
                         use: [
-                            ...getCssLoaders(config, 1),
+                            ...getCssLoaders(config),
                             {
                                 loader: 'sass-loader',
                                 ...(config.sassLoaderData ? {

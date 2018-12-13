@@ -9,19 +9,21 @@ We make use of various preprocessors to add functionality. Most notably:
 
 ### Enabling/Configuring CSS Autoprefixer
 
-In order to use the CSS Autoprefixer, two steps are required:
+In order to use the CSS Autoprefixer:
 
-* `VSB_CSS_AUTOPREFIXER_ENABLED=true` must be set as a build time environment variable or the `postcss-loader` will not be added to webpack
-*  There must be a `postcss.config.js` file and a `.browserslistrc` file in the root of the project
+* Pass the build-time config `enablePostCss` flag as `true`
+* Optionally pass along any `postcss-loader` options through the `postCssOpts` build-time config option
+  * This is most useful to [pass the context](https://github.com/postcss/postcss-loader#context-ctx) to your `postcss.config.js` file
+* There must be a `postcss.config.js` file and a `.browserslistrc` file in the root of the project
 
 ##### `postcss.config.js`
 
 ```
-module.exports = {
+module.exports = (ctx) => ({
     plugins: [
         require('autoprefixer'),
     ],
-};
+});
 ```
 
 If you need to customize the options being passed to the Autoprefixer, you'll need to override this file with the following:

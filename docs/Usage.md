@@ -10,13 +10,17 @@ const getClientConfig = require('vue-ssr-build/build/webpack.client.config');
 
 // Configuration options that can be passed to getClientConfig
 const configOpts = {
-    type: 'client',    // required (client|server)
-    rootDir: null,     // required - root directory of the repo,
-                       // used for aliases
-    i18nBlocks: false, // Boolean - include support for <i18n> blocks
-                       // in components
-    theme: null,       // Theme for vue-themed-style-loader
-    sassLoaderData: null,  // Data to pass to sass-loader
+    type: 'client',       // required (client|server)
+    rootDir: null,        // required - root directory of the repo,
+                          // used for aliases
+    extractCss: false,    // Used to extract CSS files during production builds
+    enablePostCss: false, // Enable postcss-loader
+    postCssOpts: null,    // options for postcss-loader
+    i18nBlocks: false,    // Boolean - include support for <i18n> blocks
+                          // in components
+    theme: null,          // Theme for vue-themed-style-loader
+    sassLoaderData: null, // Data to pass to sass-loader
+    babelLoader: true,    // Include babel-loader for transpilation
 };
 
 module.exports = merge(getClientConfig(configOpts), {
@@ -32,13 +36,17 @@ const getServerConfig = require('vue-ssr-build/build/webpack.server.config');
 
 // Configuration options that can be passed to getServerConfig
 const configOpts = {
-    type: 'client',    // required (client|server)
-    rootDir: null,     // required - root directory of the repo,
-                       // used for aliases
-    i18nBlocks: false, // Boolean - include support for <i18n> blocks
-                       // in components
-    theme: null,       // Theme for vue-themed-style-loader
-    sassLoaderData: null,  // Data to pass to sass-loader
+    type: 'client',       // required (client|server)
+    rootDir: null,        // required - root directory of the repo,
+                          // used for aliases
+    extractCss: false,    // Used to extract CSS files during production builds
+    enablePostCss: false, // Enable postcss-loader
+    postCssOpts: null,    // options for postcss-loader
+    i18nBlocks: false,    // Boolean - include support for <i18n> blocks
+                          // in components
+    theme: null,          // Theme for vue-themed-style-loader
+    sassLoaderData: null, // Data to pass to sass-loader
+    babelLoader: false,   // Include babel-loader for transpilation
 };
 
 module.exports = merge(getServerConfig(configOpts), {
