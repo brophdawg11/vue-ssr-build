@@ -130,6 +130,7 @@ export default function initializeClient(createApp, clientOpts) {
                 route: to,
                 router,
                 store,
+                from,
             });
             return Promise.resolve()
                 .then(() => opts.middleware(to, from, store))
