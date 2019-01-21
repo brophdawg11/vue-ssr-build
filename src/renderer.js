@@ -64,7 +64,7 @@ function createRenderer(bundle, options, config) {
     const prettySize = Math.round(config.componentCacheMaxSize / 1024);
     const prettyAge = Math.round(config.componentCacheMaxAge / 1000);
     config.logger.debug(`Creating component cache: maxSize ${prettySize}Kb, maxAge ${prettyAge}s`);
-    caches[config.name] = LRU({
+    caches[config.name] = new LRU({
         length(n, key) {
             // Vue components come in as an object with an html key containing
             // the SSR output

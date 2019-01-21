@@ -1,0 +1,5 @@
+{
+    "hooks": {
+        "pre-commit": "echo 'Running ESLint...' && npm run lint"
+    }
+}
