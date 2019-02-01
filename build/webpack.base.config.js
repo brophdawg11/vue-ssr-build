@@ -1,12 +1,10 @@
-/* eslint-disable no-console, import/no-extraneous-dependencies */
+/* eslint-disable no-console */
 
 const path = require('path');
 
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const isLocal = process.env.NODE_ENV === 'local';
 const isProd = process.env.NODE_ENV === 'production';
@@ -111,7 +109,9 @@ module.exports = {
                     ...(config.babelLoader ? [{
                         test: /\.js$/,
                         loader: 'babel-loader',
-                        exclude: /node_modules/,
+                        // Allow a15-js-service and vue-ssr-build to be run through
+                        // babel since we don't pre-transpile them
+                        exclude: /node_modules\/(?!(a15-js-service|vue-ssr-build)\/).*/,
                     }] : []),
 
                     {
@@ -160,19 +160,6 @@ module.exports = {
                     },
                 ],
             },
-            ...(config.extractCss && config.isProd ? {
-                optimization: {
-                    minimizer: [
-                        new UglifyJsPlugin({
-                            cache: true,
-                            parallel: true,
-                            sourceMap: true,
-                        }),
-                        // Minimize extracted CSS files
-                        new OptimizeCSSAssetsPlugin({}),
-                    ],
-                },
-            } : {}),
             plugins: [
                 new webpack.DefinePlugin({
                     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
