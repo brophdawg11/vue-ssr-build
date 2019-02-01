@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
@@ -40,7 +40,7 @@
     "sass-loader": "7.1.0",
     "svg-inline-loader": "0.8.0",
     "svg-url-loader": "2.3.2",
-    "uglifyjs-webpack-plugin": "2.1.1",
+    "terser-webpack-plugin": "1.2.1",
     "vue": "2.5.22",
     "vue-i18n": "8.7.0",
     "vue-i18n-extensions": "0.2.0",

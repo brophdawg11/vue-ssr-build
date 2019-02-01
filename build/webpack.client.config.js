@@ -1,12 +1,12 @@
-/* eslint-disable import/no-extraneous-dependencies */
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const VisualizerPlugin = require('webpack-visualizer-plugin');
-/* eslint-enable import/no-extraneous-dependencies */
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
 
-const { getBaseConfig } = require('./webpack.base.config');
+const { getBaseConfig, isProd } = require('./webpack.base.config');
 
 module.exports = function getClientConfig(configOpts) {
     const config = Object.assign({
@@ -19,6 +19,7 @@ module.exports = function getClientConfig(configOpts) {
         theme: null,
         sassLoaderData: null,
         babelLoader: true,
+        terserOptions: null,
     }, configOpts);
 
     const clientConfig = merge(getBaseConfig(config), {
@@ -31,6 +32,23 @@ module.exports = function getClientConfig(configOpts) {
             new VueSSRClientPlugin(),
             new VisualizerPlugin(),
         ],
+        ...(config.extractCss && isProd ? {
+            optimization: {
+                minimizer: [
+                    new TerserPlugin({
+                        cache: true,
+                        parallel: false,
+                        sourceMap: true,
+                        terserOptions: {
+                            safari10: true,
+                            ...config.terserOptions,
+                        },
+                    }),
+                    // Minimize extracted CSS files
+                    new OptimizeCSSAssetsPlugin({}),
+                ],
+            },
+        } : {}),
     });
 
     return clientConfig;
