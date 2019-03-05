@@ -36,7 +36,7 @@ export default function initializeServer(createApp, serverOpts) {
                             // Allow a function to be passed that can generate a route-aware
                             // module name
                             const moduleName = typeof c.vuex.moduleName === 'function' ?
-                                c.vuex.moduleName(router.currentRoute) :
+                                c.vuex.moduleName({ $route: router.currentRoute }) :
                                 c.vuex.moduleName;
                             opts.logger.info('Registering dynamic Vuex module:', moduleName);
                             store.registerModule(moduleName, c.vuex.module, {
