@@ -39,8 +39,6 @@ module.exports = {
         'no-console': 'error',
         // Allow unary ++ and -- operators
         'no-plusplus': 'off',
-        // Don't enforce one-var for now
-        'one-var': 'off',
         // Put operators at the end of the lint (?, :, &&, ||)
         'operator-linebreak': ['error', 'after'],
         // Don't enforce a blank line or not at the beginning of a block
