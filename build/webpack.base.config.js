@@ -165,10 +165,13 @@ module.exports = {
                     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
                 }),
                 new VueLoaderPlugin(),
-                new MiniCssExtractPlugin({
-                    filename: isProd ? 'app.[contenthash].css' : 'app.css',
-                    chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
-                }),
+                ...(config.extractCss ? [
+                    new MiniCssExtractPlugin({
+                        filename: isProd ? 'app.[contenthash].css' : 'app.css',
+                        chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
+                        insertInto: config.insertInto,
+                    }),
+                ] : []),
             ],
         };
     },
