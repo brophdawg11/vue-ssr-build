@@ -13,7 +13,8 @@ module.exports = {
         // Previously stage-3 (stages are no longer used in babel 7)
         // See https://babeljs.io/blog/2018/07/27/removing-babels-stage-presets
         "@babel/plugin-proposal-json-strings",
-        "@babel/plugin-proposal-object-rest-spread",
+        // We need loose due to new specifications in v7 https://babeljs.io/docs/en/v7-migration
+        ["@babel/plugin-proposal-object-rest-spread", { "loose": true }],
         "@babel/plugin-syntax-dynamic-import",
         "@babel/plugin-syntax-import-meta",
     ],
