@@ -24,7 +24,7 @@ module.exports = {
         '^.+\\.js?$': 'babel-jest',
     },
     transformIgnorePatterns: [
-        'node_modules/(?!(lodash-es|vue-ssr-build))',
+        '<rootDir>/node_modules/(?!(lodash-es|vue-ssr-build))',
     ],
     verbose: true,
 };
