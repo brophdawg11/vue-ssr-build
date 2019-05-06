@@ -1,12 +1,12 @@
 module.exports = {
     "presets": [
-        ["env", {
+        ["@babel/preset-env", {
             "targets": {
                 "browsers": [ ">5%", "last 2 versions" ]
             },
             "modules": false
         }],
-        "stage-3"
+        "@babel/preset-stage-3"
     ],
     "plugins": [
         // Allow proper tree shaking of lodash ES6 named imports
