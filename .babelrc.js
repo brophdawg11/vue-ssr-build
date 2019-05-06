@@ -12,9 +12,10 @@ module.exports = {
         "lodash",
         // Previously stage-3 (stages are no longer used in babel 7)
         // See https://babeljs.io/blog/2018/07/27/removing-babels-stage-presets
+        "@babel/plugin-proposal-json-strings",
+        "@babel/plugin-proposal-object-rest-spread",
         "@babel/plugin-syntax-dynamic-import",
         "@babel/plugin-syntax-import-meta",
-        "@babel/plugin-proposal-json-strings"
     ],
     "env": {
         "test": {
