@@ -6,12 +6,14 @@ module.exports = {
             },
             "modules": false
         }],
-        "@babel/preset-stage-3"
     ],
     "plugins": [
         // Allow proper tree shaking of lodash ES6 named imports
         "lodash",
-        "syntax-dynamic-import"
+        // Previously stage-3 (stages are no longer used in babel 7)
+        // See https://babeljs.io/blog/2018/07/27/removing-babels-stage-presets
+        "@babel/plugin-syntax-dynamic-import",
+        "@babel/plugin-proposal-json-strings"
     ],
     "env": {
         "test": {
