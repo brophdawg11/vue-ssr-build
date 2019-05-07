@@ -27,6 +27,7 @@ const defaults = {
     isLocal: process.env.NODE_ENV === 'local',
     isDev: process.env.NODE_ENV === 'development',
     isProd: process.env.NODE_ENV === 'production',
+    logger: console,
     hmr: false,
     stream: true,
     componentCacheDebug: false,
@@ -52,7 +53,7 @@ function createRenderer(bundle, options, config) {
         null;
 
     if (caches[config.name]) {
-        console.log(
+        config.logger.debug(
             `Recreating the "${config.name}" Vue SSR BundleRenderer, clearing`,
             'the component cache and re-creating',
         );
@@ -62,8 +63,8 @@ function createRenderer(bundle, options, config) {
 
     const prettySize = Math.round(config.componentCacheMaxSize / 1024);
     const prettyAge = Math.round(config.componentCacheMaxAge / 1000);
-    console.log(`Creating component cache: maxSize ${prettySize}Kb, maxAge ${prettyAge}s`);
-    caches[config.name] = LRU({
+    config.logger.debug(`Creating component cache: maxSize ${prettySize}Kb, maxAge ${prettyAge}s`);
+    caches[config.name] = new LRU({
         length(n, key) {
             // Vue components come in as an object with an html key containing
             // the SSR output
@@ -74,7 +75,7 @@ function createRenderer(bundle, options, config) {
             );
             const length = valid ? n.html.length : 1;
             if (config.componentCacheDebug) {
-                console.log(`Adding component cache entry: key=${key}, length=${length}`);
+                config.logger.debug(`Adding component cache entry: key=${key}, length=${length}`);
             }
             return length;
         },
@@ -116,7 +117,7 @@ function renderToStream(config, context, res, cb) {
 function render(config, clientManifest, req, res) {
     const s = Date.now();
 
-    console.log('\n\nVue request started', new Date().toISOString());
+    config.logger.log('\n\nVue request started', new Date().toISOString());
 
     const context = {
         title: 'URBN Community',
@@ -133,15 +134,15 @@ function render(config, clientManifest, req, res) {
     // using the server render logic in entry-server.js
     const renderFn = config.stream ? renderToStream : renderToString;
 
-    console.log(`Rendering from ${config.name} renderer!`);
+    config.logger.log(`Rendering from ${config.name} renderer!`);
     renderFn(config, context, res, () => {
         if (config.componentCacheDebug) {
-            console.log('Component cache stats:');
-            console.log('  length:', caches[config.name].length);
-            console.log('  keys:', caches[config.name].keys().join(','));
+            config.logger.log('Component cache stats:');
+            config.logger.log('  length:', caches[config.name].length);
+            config.logger.log('  keys:', caches[config.name].keys().join(','));
         }
-        console.log('Vue request ended', new Date().toISOString());
-        console.log(`SSR request took: ${Date.now() - s}ms`);
+        config.logger.log('Vue request ended', new Date().toISOString());
+        config.logger.log(`SSR request took: ${Date.now() - s}ms`);
     });
 }
 
@@ -150,9 +151,9 @@ module.exports = function initVueRenderer(app, configOpts) {
     configs[config.name] = config;
 
     if (renderers[config.name]) {
-        console.error(`[ERROR] There already exists a "${config.name}" renderer, overwriting...`);
+        config.logger.error(`[ERROR] Overwriting existing "${config.name}" renderer`);
     } else {
-        console.log(`Creating "${config.name}" renderer...`);
+        config.logger.log(`Creating "${config.name}" renderer...`);
     }
 
     // In development: setup the dev server with watch and hot-reload,
@@ -169,12 +170,12 @@ module.exports = function initVueRenderer(app, configOpts) {
                 (bundle, options) => {
                     // When we receive an update, we re-create all renderers
                     Object.keys(configs).forEach((k) => {
-                        console.log(`HMR: Creating "${k}" renderer`);
+                        config.logger.log(`HMR: Creating "${k}" renderer`);
                         if (k === 'default') {
                             renderers[k] = createRenderer(bundle, options, configs[k]);
                         } else {
                             // But we load the proper teplate for non-default renderers
-                            console.log('Re-loading non-default template');
+                            config.logger.log('Re-loading non-default template');
                             const newOptions = Object.assign({}, options, {
                                 template: fs.readFileSync(configs[k].templatePath, 'utf-8'),
                             });
@@ -184,7 +185,7 @@ module.exports = function initVueRenderer(app, configOpts) {
                 },
             );
         } else {
-            console.warn(
+            config.logger.warn(
                 `Skipping HMR setup for "${config.name}" renderer.  Make sure you`,
                 'have a "default" renderer to enable HMR',
             );

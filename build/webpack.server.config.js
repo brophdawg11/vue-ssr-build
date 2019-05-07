@@ -28,6 +28,8 @@ module.exports = function getServerConfig(configOpts) {
         type: 'server',
         rootDir: null,
         extractCss: false,
+        enablePostCss: false,
+        postCssOpts: null,
         i18nBlocks: false,
         theme: null,
         sassLoaderData: null,

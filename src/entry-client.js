@@ -43,7 +43,7 @@ export default function initializeClient(createApp, clientOpts) {
         // module name
         const getModuleName = (c, route) => (
             typeof c.vuex.moduleName === 'function' ?
-                c.vuex.moduleName(route) :
+                c.vuex.moduleName({ $route: route }) :
                 c.vuex.moduleName
         );
 
@@ -130,6 +130,7 @@ export default function initializeClient(createApp, clientOpts) {
                 route: to,
                 router,
                 store,
+                from,
             });
             return Promise.resolve()
                 .then(() => opts.middleware(to, from, store))

@@ -1,12 +1,10 @@
+/* eslint-disable no-console */
+
 const path = require('path');
 
-/* eslint-disable import/no-extraneous-dependencies */
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
-/* eslint-enable import/no-extraneous-dependencies */
 
 const isLocal = process.env.NODE_ENV === 'local';
 const isProd = process.env.NODE_ENV === 'production';
@@ -14,32 +12,46 @@ const isDev = !isLocal && !isProd;
 const logLevel = process.env.LOG_LEVEL || 'debug';
 const environment = isProd ? 'production' : 'development';
 
-/* eslint-disable no-console */
 console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
 console.log(`Webpack building for environment: ${environment}`);
-/* eslint-enable no-console */
 
 function getCssLoaders(config) {
-    const cssLoader = {
-        loader: 'css-loader',
-        options: {
-            minimize: isProd,
+    console.log(`Enable PostCSS: ${config.enablePostCss}`);
+
+    const addlLoaders = [
+        ...(config.enablePostCss ? [{
+            loader: 'postcss-loader',
+            options: config.postCssOpts,
+        }] : []),
+    ];
+
+    const cssLoaders = [
+        {
+            loader: 'css-loader',
+            options: {
+                minimize: isProd,
+                // Number of loaders applied prior to css-loader
+                // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
+                importLoaders: addlLoaders.length,
+            },
         },
-    };
+        ...addlLoaders,
+    ];
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            return ['css-loader/locals'];
+            cssLoaders[0].loader = 'css-loader/locals';
+            return [...cssLoaders];
         }
 
-        return ['vue-style-loader', cssLoader];
+        return ['vue-style-loader', ...cssLoaders];
     }
 
     if (config.extractCss) {
-        return [MiniCssExtractPlugin.loader, cssLoader];
+        return [MiniCssExtractPlugin.loader, ...cssLoaders];
     }
 
-    return ['vue-style-loader', cssLoader];
+    return ['vue-style-loader', ...cssLoaders];
 }
 
 module.exports = {
@@ -97,7 +109,9 @@ module.exports = {
                     ...(config.babelLoader ? [{
                         test: /\.js$/,
                         loader: 'babel-loader',
-                        exclude: /node_modules/,
+                        // Allow a15-js-service and vue-ssr-build to be run through
+                        // babel since we don't pre-transpile them
+                        exclude: /node_modules\/(?!(a15-js-service|vue-ssr-build)\/).*/,
                     }] : []),
 
                     {
@@ -146,28 +160,18 @@ module.exports = {
                     },
                 ],
             },
-            ...(config.extractCss && config.isProd ? {
-                optimization: {
-                    minimizer: [
-                        new UglifyJsPlugin({
-                            cache: true,
-                            parallel: true,
-                            sourceMap: true,
-                        }),
-                        // Minimize extracted CSS files
-                        new OptimizeCSSAssetsPlugin({}),
-                    ],
-                },
-            } : {}),
             plugins: [
                 new webpack.DefinePlugin({
                     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
                 }),
                 new VueLoaderPlugin(),
-                new MiniCssExtractPlugin({
-                    filename: isProd ? 'app.[contenthash].css' : 'app.css',
-                    chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
-                }),
+                ...(config.extractCss ? [
+                    new MiniCssExtractPlugin({
+                        filename: isProd ? 'app.[contenthash].css' : 'app.css',
+                        chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
+                        insertInto: config.insertInto,
+                    }),
+                ] : []),
             ],
         };
     },
