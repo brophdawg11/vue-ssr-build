@@ -124,11 +124,11 @@ module.exports = {
                             ...getCssLoaders(config),
                             {
                                 loader: 'sass-loader',
-                                ...(config.sassLoaderData ? {
-                                    options: {
-                                        data: config.sassLoaderData,
-                                    },
-                                } : {}),
+                                options: Object.assign({
+                                    sourceComments: false,
+                                }, (config.sassLoaderData ? {
+                                    data: config.sassLoaderData,
+                                } : {})),
                             },
                         ],
                     },
