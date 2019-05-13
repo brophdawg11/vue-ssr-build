@@ -19,7 +19,7 @@ module.exports = (api) => {
         env: {
             test: {
                 presets: [
-                    ['env', {
+                    ['@babel/preset-env', {
                         modules: 'commonjs',
                     }],
                 ],
