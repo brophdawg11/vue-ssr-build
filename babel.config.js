@@ -17,10 +17,23 @@ module.exports = (api) => {
             '@babel/plugin-syntax-dynamic-import',
         ],
         env: {
+            production: {
+                plugins: [
+                    // Allow proper tree shaking of lodash ES6 named imports
+                    // Only wire this up in production so it doesn't cause issues
+                    // when running with Jest.  See:
+                    //    https://github.com/istanbuljs/babel-plugin-istanbul/issues/116
+                    'lodash',
+                ],
+            },
             test: {
+                plugins: [
+                    'babel-plugin-dynamic-import-node',
+                ],
                 presets: [
                     ['@babel/preset-env', {
                         modules: 'commonjs',
+                        targets: { node: 'current' },
                     }],
                 ],
             },
