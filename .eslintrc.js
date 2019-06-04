@@ -54,7 +54,7 @@ module.exports = {
         // See: https://github.com/benmosher/eslint-plugin-import/issues/376
         'import/no-unresolved': ['error', {
             commonjs: true,
-            ignore: [ '^@' ],
+            ignore: [ '^~' ],
         }],
         // Use 4 space indents in templates
         'vue/html-indent': ['error', 4],
