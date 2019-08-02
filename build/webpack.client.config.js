@@ -21,6 +21,7 @@ module.exports = function getClientConfig(configOpts) {
         sassLoaderData: null,
         babelLoader: true,
         terserOptions: null,
+        svgInlineLoaderOptions: null,
     }, configOpts);
 
     const clientConfig = merge(getBaseConfig(config), {

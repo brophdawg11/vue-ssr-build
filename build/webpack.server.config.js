@@ -34,6 +34,7 @@ module.exports = function getServerConfig(configOpts) {
         theme: null,
         sassLoaderData: null,
         babelLoader: true,
+        svgInlineLoaderOptions: null,
     }, configOpts);
 
     const serverConfig = merge(getBaseConfig(config), {
