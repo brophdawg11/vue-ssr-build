@@ -145,7 +145,10 @@ module.exports = {
                         test: /\.svg$/,
                         oneOf: [{
                             resourceQuery: /inline/,
-                            use: 'svg-inline-loader',
+                            use: {
+                                loader: 'svg-inline-loader',
+                                options: config.svgInlineLoaderOptions,
+                            },
                         }, {
                             test: /\.svg$/,
                             use: {
