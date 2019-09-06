@@ -39,6 +39,13 @@ module.exports = {
         'no-console': 'error',
         // Allow unary ++ and -- operators
         'no-plusplus': 'off',
+        // Allow up to 8 props, but mostly rely on max line length to limit this
+        'object-curly-newline': ['error', {
+            ObjectExpression: { minProperties: 8, multiline: true, consistent: true },
+            ObjectPattern: { minProperties: 8, multiline: true, consistent: true },
+            ImportDeclaration: { minProperties: 8, multiline: true, consistent: true },
+            ExportDeclaration: { minProperties: 8, multiline: true, consistent: true },
+        }],
         // Put operators at the end of the lint (?, :, &&, ||)
         'operator-linebreak': ['error', 'after'],
         // Don't enforce a blank line or not at the beginning of a block
