@@ -1,4 +1,9 @@
-import { find, isString } from 'lodash-es';
+import { find, isFunction, isString } from 'lodash-es';
+
+const shouldIgnoreRouteUpdate = (c, args) => (
+    isFunction(c.shouldIgnoreRouteUpdate) &&
+    c.shouldIgnoreRouteUpdate(args) === true
+);
 
 export default function initializeClient(createApp, clientOpts) {
     const opts = Object.assign({
@@ -42,7 +47,7 @@ export default function initializeClient(createApp, clientOpts) {
         // Allow a function to be passed that can generate a route-aware
         // module name
         const getModuleName = (c, route) => (
-            typeof c.vuex.moduleName === 'function' ?
+            isFunction(c.vuex.moduleName) ?
                 c.vuex.moduleName({ $route: route }) :
                 c.vuex.moduleName
         );
@@ -50,8 +55,10 @@ export default function initializeClient(createApp, clientOpts) {
         // Before routing, register any dynamic Vuex modules for new components
         router.beforeResolve((to, from, next) => {
             try {
+                const fetchDataArgs = { app, route: to, router, store, from };
                 router.getMatchedComponents(to)
                     .filter(c => 'vuex' in c)
+                    .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
                     .forEach((c) => {
                         const name = getModuleName(c, to);
                         const existingModule = find(registeredModules, { name });
@@ -79,13 +86,13 @@ export default function initializeClient(createApp, clientOpts) {
 
         // After routing, unregister any dynamic Vuex modules from prior components
         router.afterEach((to, from) => {
-            const priorComponents = router.getMatchedComponents(from);
-
-            priorComponents
+            const fetchDataArgs = { app, route: to, router, store, from };
+            const toModuleNames = router.getMatchedComponents(to).map(c => getModuleName(c, to));
+            router.getMatchedComponents(from)
                 .filter(c => 'vuex' in c)
+                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
                 .forEach((c) => {
                     const fromModuleName = getModuleName(c, from);
-                    const toModuleName = getModuleName(c, to);
 
                     // After every routing operation, perform available cleanup
                     // of registered modules, keeping around up to a specified
@@ -93,7 +100,7 @@ export default function initializeClient(createApp, clientOpts) {
                     const minIndex = Math.max(moduleIndex - opts.maxVuexModules, 0);
                     registeredModules.forEach((m, idx) => {
                         if (m.index < minIndex) {
-                            if (m.name !== toModuleName && m.name !== fromModuleName) {
+                            if (!toModuleNames.includes(m.name) && m.name !== fromModuleName) {
                                 opts.logger.info('Unregistering dynamic Vuex module:', m.name);
                                 store.unregisterModule(m.name);
                                 registeredModules.splice(idx, 1);
@@ -117,25 +124,23 @@ export default function initializeClient(createApp, clientOpts) {
         // Approach based on:
         //   https://ssr.vuejs.org/en/data.html#client-data-fetching
         router.beforeResolve((to, from, next) => {
-            // For simplicity, since we aren't using nested routes or anything fancy,
-            // we will just always call fetchData on the new components.  If we try to
-            // route to the same exact route, it shouldn't even fire the beforeResolve.
-            // And if we are routing to the same component with new params, then we
-            // likely want to be calling fetchData again.  If this proves to be too
-            // loose of an approach, a comprehensive approach is available at:
-            //   https://ssr.vuejs.org/en/data.html#client-data-fetching
-            const components = router.getMatchedComponents(to);
-            const fetchData = c => c.fetchData && c.fetchData({
-                app,
-                route: to,
-                router,
-                store,
-                from,
-            });
+            const routeUpdateStr = `${from.fullPath} -> ${to.fullPath}`;
+            const fetchDataArgs = { app, route: to, router, store, from };
+            const fetchData = c => isFunction(c.fetchData) && c.fetchData(fetchDataArgs);
+            const components = router.getMatchedComponents(to)
+                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
+
+            // Short circuit if none of our components need to process the route update
+            if (components.length === 0) {
+                opts.logger.debug(`Ignoring route update ${routeUpdateStr}`);
+                return next();
+            }
+
+            opts.logger.debug(`Running middleware/fetchData for route update ${routeUpdateStr}`);
             return Promise.resolve()
-                .then(() => opts.middleware(to, from, store))
+                .then(() => opts.middleware(to, from, store, app))
                 .then(() => Promise.all(components.map(fetchData)))
-                .then(() => opts.postMiddleware(to, from, store))
+                .then(() => opts.postMiddleware(to, from, store, app))
                 .then(() => next())
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');

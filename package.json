@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
@@ -13,6 +13,8 @@
     "url": "git+https://github.com/brophdawg11/vue-ssr-build.git"
   },
   "scripts": {
+    "bump": "npm --no-git-tag-version version minor",
+    "bump:patch": "npm --no-git-tag-version version patch",
     "lint": "eslint ."
   },
   "dependencies": {
