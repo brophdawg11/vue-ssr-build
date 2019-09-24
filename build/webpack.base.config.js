@@ -54,6 +54,11 @@ function getCssLoaders(config) {
     return ['vue-style-loader', ...cssLoaders];
 }
 
+function fileLoaderName() {
+    const hash = process.env.NODE_ENV === 'production' ? '-[contenthash]' : '';
+    return `images/[name]${hash}.[ext]`;
+}
+
 module.exports = {
     isDev,
     isLocal,
@@ -150,6 +155,14 @@ module.exports = {
                                 options: config.svgInlineLoaderOptions,
                             },
                         }, {
+                            resourceQuery: /http/,
+                            use: {
+                                loader: 'file-loader',
+                                options: {
+                                    name: fileLoaderName,
+                                },
+                            },
+                        }, {
                             test: /\.svg$/,
                             use: {
                                 // See: https://iamakulov.com/notes/optimize-images-webpack/
@@ -157,6 +170,7 @@ module.exports = {
                                 options: {
                                     limit: 8192,
                                     noquotes: true,
+                                    name: fileLoaderName,
                                 },
                             },
                         }],
