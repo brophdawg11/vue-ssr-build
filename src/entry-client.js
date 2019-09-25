@@ -87,7 +87,9 @@ export default function initializeClient(createApp, clientOpts) {
         // After routing, unregister any dynamic Vuex modules from prior components
         router.afterEach((to, from) => {
             const fetchDataArgs = { app, route: to, router, store, from };
-            const toModuleNames = router.getMatchedComponents(to).map(c => getModuleName(c, to));
+            const toModuleNames = router.getMatchedComponents(to)
+                .filter(c => 'vuex' in c)
+                .map(c => getModuleName(c, to));
             router.getMatchedComponents(from)
                 .filter(c => 'vuex' in c)
                 .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
