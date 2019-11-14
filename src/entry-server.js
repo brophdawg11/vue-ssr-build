@@ -60,7 +60,10 @@ export default function initializeServer(createApp, serverOpts) {
                     // Set initialState and translations to be embedded into
                     // the template for client hydration
                     .then(() => Object.assign(context, {
-                        initialState: JSON.stringify(
+                        // Stringify so we can use JSON.parse for performance.
+                        //   Double stringify to properly escape characters. See:
+                        //   https://v8.dev/blog/cost-of-javascript-2019#json
+                        initialState: JSON.stringify(JSON.stringify(
                             store.state,
                             // Convert all undefined values to null's during stringification.
                             // Default behavior of JSON.stringify is to strip undefined values,
@@ -68,7 +71,7 @@ export default function initializeServer(createApp, serverOpts) {
                             // property reactive. See:
                             //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#Description
                             (k, v) => (v === undefined ? null : v),
-                        ),
+                        )),
                     }))
                     .then(() => resolve(app))
                     .catch((e) => {
