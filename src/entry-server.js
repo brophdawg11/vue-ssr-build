@@ -46,6 +46,7 @@ export default function initializeServer(createApp, serverOpts) {
                 }
 
                 const fetchData = c => c.fetchData && c.fetchData({
+                    ssrContext: context,
                     app,
                     route: router.currentRoute,
                     router,
