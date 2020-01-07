@@ -142,8 +142,10 @@ export default function initializeClient(createApp, clientOpts) {
             return Promise.resolve()
                 .then(() => opts.middleware(to, from, store, app))
                 .then(() => Promise.all(components.map(fetchData)))
-                .then(() => opts.postMiddleware(to, from, store, app))
-                .then(() => next())
+                // Proxy results through the chain
+                .then(results => opts.postMiddleware(to, from, store, app).then(() => results))
+                // Call next with the first non-null resolved value from fetchData
+                .then(results => next(results.find(r => r != null)))
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');
                     opts.logger.error(e);
