@@ -128,7 +128,9 @@ export default function initializeClient(createApp, clientOpts) {
         router.beforeResolve((to, from, next) => {
             const routeUpdateStr = `${from.fullPath} -> ${to.fullPath}`;
             const fetchDataArgs = { app, route: to, router, store, from };
-            const fetchData = c => isFunction(c.fetchData) && c.fetchData(fetchDataArgs);
+            // Call fetchData for any routes that define it, otherwise resolve with
+            // null to allow routing via next(null)
+            const fetchData = c => (isFunction(c.fetchData) ? c.fetchData(fetchDataArgs) : null);
             const components = router.getMatchedComponents(to)
                 .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
 
