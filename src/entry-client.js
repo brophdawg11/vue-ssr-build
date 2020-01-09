@@ -128,7 +128,9 @@ export default function initializeClient(createApp, clientOpts) {
         router.beforeResolve((to, from, next) => {
             const routeUpdateStr = `${from.fullPath} -> ${to.fullPath}`;
             const fetchDataArgs = { app, route: to, router, store, from };
-            const fetchData = c => isFunction(c.fetchData) && c.fetchData(fetchDataArgs);
+            // Call fetchData for any routes that define it, otherwise resolve with
+            // null to allow routing via next(null)
+            const fetchData = c => (isFunction(c.fetchData) ? c.fetchData(fetchDataArgs) : null);
             const components = router.getMatchedComponents(to)
                 .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
 
@@ -142,8 +144,10 @@ export default function initializeClient(createApp, clientOpts) {
             return Promise.resolve()
                 .then(() => opts.middleware(to, from, store, app))
                 .then(() => Promise.all(components.map(fetchData)))
-                .then(() => opts.postMiddleware(to, from, store, app))
-                .then(() => next())
+                // Proxy results through the chain
+                .then(results => opts.postMiddleware(to, from, store, app).then(() => results))
+                // Call next with the first non-null resolved value from fetchData
+                .then(results => next(results.find(r => r != null)))
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');
                     opts.logger.error(e);
