@@ -20,6 +20,7 @@ module.exports = {
     // Check if imports actually resolve
     settings: {
         'import/resolver': {
+            node: {},
             webpack: {
                 config: 'build/webpack.client.config.js'
             }
