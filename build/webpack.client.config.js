@@ -38,9 +38,6 @@ module.exports = function getClientConfig(configOpts) {
             optimization: {
                 minimizer: [
                     new TerserPlugin({
-                        cache: true,
-                        parallel: false,
-                        sourceMap: true,
                         terserOptions: {
                             safari10: true,
                             ...config.terserOptions,

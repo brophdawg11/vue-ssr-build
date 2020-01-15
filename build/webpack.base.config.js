@@ -168,7 +168,6 @@ module.exports = {
                                 loader: 'svg-url-loader',
                                 options: {
                                     limit: 8192,
-                                    noquotes: true,
                                     name: fileLoaderName,
                                 },
                             },
