@@ -24,7 +24,7 @@ function serverExternals(context, request, callback) {
 }
 
 module.exports = function getServerConfig(configOpts) {
-    const config = Object.assign({
+    const config = {
         type: 'server',
         rootDir: null,
         extractCss: false,
@@ -35,7 +35,8 @@ module.exports = function getServerConfig(configOpts) {
         sassLoaderData: null,
         babelLoader: true,
         svgInlineLoaderOptions: null,
-    }, configOpts);
+        ...configOpts,
+    };
 
     const serverConfig = merge(getBaseConfig(config), {
         // Note: Do not start this name with server- as that will confuse the

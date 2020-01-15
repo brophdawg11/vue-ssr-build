@@ -147,7 +147,10 @@ function render(config, clientManifest, req, res) {
 }
 
 module.exports = function initVueRenderer(app, configOpts) {
-    const config = Object.assign({}, defaults, configOpts);
+    const config = {
+        ...defaults,
+        ...configOpts,
+    };
     configs[config.name] = config;
 
     if (renderers[config.name]) {
@@ -174,11 +177,12 @@ module.exports = function initVueRenderer(app, configOpts) {
                         if (k === 'default') {
                             renderers[k] = createRenderer(bundle, options, configs[k]);
                         } else {
-                            // But we load the proper teplate for non-default renderers
+                            // But we load the proper template for non-default renderers
                             config.logger.log('Re-loading non-default template');
-                            const newOptions = Object.assign({}, options, {
+                            const newOptions = {
+                                ...options,
                                 template: fs.readFileSync(configs[k].templatePath, 'utf-8'),
-                            });
+                            };
                             renderers[k] = createRenderer(bundle, newOptions, configs[k]);
                         }
                     });
