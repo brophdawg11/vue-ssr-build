@@ -29,7 +29,6 @@ function getCssLoaders(config) {
         {
             loader: 'css-loader',
             options: {
-                minimize: isProd,
                 // Number of loaders applied prior to css-loader
                 // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
                 importLoaders: addlLoaders.length,
