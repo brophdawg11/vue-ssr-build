@@ -17,14 +17,6 @@ module.exports = {
     plugins: [
         'vue',
     ],
-    // Check if imports actually resolve
-    settings: {
-        'import/resolver': {
-            webpack: {
-                config: 'build/webpack.client.config.js'
-            }
-        }
-    },
     rules: {
         // 4 space indent
         'indent': [ 'error', 4 ],
@@ -46,23 +38,12 @@ module.exports = {
             ImportDeclaration: { minProperties: 8, multiline: true, consistent: true },
             ExportDeclaration: { minProperties: 8, multiline: true, consistent: true },
         }],
-        // Put operators at the end of the lint (?, :, &&, ||)
+        // Put operators at the end of the line (?, :, &&, ||)
         'operator-linebreak': ['error', 'after'],
         // Don't enforce a blank line or not at the beginning of a block
         'padded-blocks': 'off',
         // Don't enforce promises being rejected with Error objects
         'prefer-promise-reject-errors': 'off',
-        // Require extensions on non-JS files.  Turned off for now because when
-        // aliased imports are ignored below, this can't determine the proper
-        // extension and therefore causes all aliases imports to error
-        //'import/extensions': ['error', 'always', { js: 'never' }],
-        'import/extensions': 'off',
-        // doesn't seem to play nice with aliases
-        // See: https://github.com/benmosher/eslint-plugin-import/issues/376
-        'import/no-unresolved': ['error', {
-            commonjs: true,
-            ignore: [ '^@' ],
-        }],
         // Use 4 space indents in templates
         'vue/html-indent': ['error', 4],
         // Allow max 2 attributes on a single line element, but once the
