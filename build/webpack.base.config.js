@@ -40,7 +40,7 @@ function getCssLoaders(config) {
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            cssLoaders[0].loader = 'css-loader/locals';
+            cssLoaders[0].options.onlyLocals = true;
             return [...cssLoaders];
         }
 
@@ -131,7 +131,7 @@ module.exports = {
                                 loader: 'sass-loader',
                                 ...(config.sassLoaderData ? {
                                     options: {
-                                        data: config.sassLoaderData,
+                                        prependData: config.sassLoaderData,
                                     },
                                 } : {}),
                             },
