@@ -42,7 +42,7 @@
     "lodash-es": "4.17.15",
     "lru-cache": "5.1.1",
     "mini-css-extract-plugin": "github:brophdawg11/mini-css-extract-plugin#urbn",
-    "node-sass": "4.13.0",
+    "node-sass": "4.13.1",
     "optimize-css-assets-webpack-plugin": "5.0.3",
     "postcss-loader": "3.0.0",
     "sass-loader": "8.0.2",
