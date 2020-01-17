@@ -6,7 +6,7 @@ const shouldIgnoreRouteUpdate = (c, args) => (
 );
 
 export default function initializeClient(createApp, clientOpts) {
-    const opts = Object.assign({
+    const opts = {
         appSelector: '#app',
         hmr: true,
         initialState: null,
@@ -16,7 +16,8 @@ export default function initializeClient(createApp, clientOpts) {
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
-    }, clientOpts);
+        ...clientOpts,
+    };
 
     let { initialState } = opts;
 

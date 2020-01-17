@@ -29,7 +29,6 @@ function getCssLoaders(config) {
         {
             loader: 'css-loader',
             options: {
-                minimize: isProd,
                 // Number of loaders applied prior to css-loader
                 // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
                 importLoaders: addlLoaders.length,
@@ -40,7 +39,7 @@ function getCssLoaders(config) {
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            cssLoaders[0].loader = 'css-loader/locals';
+            cssLoaders[0].options.onlyLocals = true;
             return [...cssLoaders];
         }
 
@@ -131,7 +130,7 @@ module.exports = {
                                 loader: 'sass-loader',
                                 ...(config.sassLoaderData ? {
                                     options: {
-                                        data: config.sassLoaderData,
+                                        prependData: config.sassLoaderData,
                                     },
                                 } : {}),
                             },
@@ -169,7 +168,6 @@ module.exports = {
                                 loader: 'svg-url-loader',
                                 options: {
                                     limit: 8192,
-                                    noquotes: true,
                                     name: fileLoaderName,
                                 },
                             },

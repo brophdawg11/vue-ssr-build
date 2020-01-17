@@ -18,6 +18,8 @@ module.exports = {
         'vue',
     ],
     rules: {
+        // Kept from airbnb-base@13, that switched to 'always' in 14
+        'arrow-parens': ['error', 'as-needed', { requireForBlockBody: true }],
         // 4 space indent
         'indent': [ 'error', 4 ],
         // Don't enforce newlines on function parens

@@ -2,13 +2,14 @@
 // https://ssr.vuejs.org/en/data.html#client-data-fetching
 
 export default function initializeServer(createApp, serverOpts) {
-    const opts = Object.assign({
+    const opts = {
         vuexModules: true,
         logger: console,
         preMiddleware: () => Promise.resolve(),
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
-    }, serverOpts);
+        ...serverOpts,
+    };
 
     return context => new Promise((resolve, reject) => Promise.resolve()
         .then(() => opts.preMiddleware(context))

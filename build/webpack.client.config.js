@@ -9,7 +9,7 @@ const VueSSRClientPlugin = require('vue-server-renderer/client-plugin');
 const { getBaseConfig, isProd } = require('./webpack.base.config');
 
 module.exports = function getClientConfig(configOpts) {
-    const config = Object.assign({
+    const config = {
         type: 'client',
         rootDir: null,
         extractCss: false,
@@ -22,7 +22,8 @@ module.exports = function getClientConfig(configOpts) {
         babelLoader: true,
         terserOptions: null,
         svgInlineLoaderOptions: null,
-    }, configOpts);
+        ...configOpts,
+    };
 
     const clientConfig = merge(getBaseConfig(config), {
         name: 'client',
@@ -38,9 +39,6 @@ module.exports = function getClientConfig(configOpts) {
             optimization: {
                 minimizer: [
                     new TerserPlugin({
-                        cache: true,
-                        parallel: false,
-                        sourceMap: true,
                         terserOptions: {
                             safari10: true,
                             ...config.terserOptions,
