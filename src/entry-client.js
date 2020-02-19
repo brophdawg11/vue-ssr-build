@@ -19,6 +19,38 @@ export default function initializeClient(createApp, clientOpts) {
         ...clientOpts,
     };
 
+    const ROUTING_MARK_NAME = 'client-side-route';
+
+    function perfInit() {
+        if (!window.performance) {
+            return;
+        }
+        debugger;
+        console.log('[perf] setting mark');
+        window.performance.mark(ROUTING_MARK_NAME);
+    }
+
+    function perfMeasure(name) {
+        if (!window.performance) {
+            return;
+        }
+        const marks = window.performance.getEntriesByName(ROUTING_MARK_NAME);
+        if (!marks || marks.length === 0) {
+            console.warn('Unable to do performance measurement without existing mark');
+            return;
+        }
+        console.log('[perf] measure', name);
+        window.performance.measure(name, ROUTING_MARK_NAME);
+    }
+
+    function perfReset() {
+        if (!window.performance) {
+            return;
+        }
+        console.log('[perf] clearing marks');
+        window.performance.clearMarks(ROUTING_MARK_NAME);
+    }
+
     let { initialState } = opts;
 
     if (isString(opts.initialStateMetaTag)) {
@@ -61,6 +93,9 @@ export default function initializeClient(createApp, clientOpts) {
                     .filter(c => 'vuex' in c)
                     .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
                     .forEach((c) => {
+                        if (window.performance.getEntriesByName('route').length > 0) {
+                            window.performance.measure('beforeResolve', 'route');
+                        }
                         const name = getModuleName(c, to);
                         const existingModule = find(registeredModules, { name });
                         if (existingModule) {
@@ -95,6 +130,7 @@ export default function initializeClient(createApp, clientOpts) {
                 .filter(c => 'vuex' in c)
                 .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
                 .forEach((c) => {
+                    perfMeasure('aftereach');
                     const fromModuleName = getModuleName(c, from);
 
                     // After every routing operation, perform available cleanup
@@ -123,6 +159,11 @@ export default function initializeClient(createApp, clientOpts) {
     // Register the fetchData hook once the router is ready since we don't want to
     // re-run fetchData for the SSR'd component
     router.onReady(() => {
+        router.beforeEach((to, from, next) => {
+            perfInit();
+            next();
+        });
+
         // Prior to resolving a route, execute any component fetchData methods.
         // Approach based on:
         //   https://ssr.vuejs.org/en/data.html#client-data-fetching
@@ -143,12 +184,19 @@ export default function initializeClient(createApp, clientOpts) {
 
             opts.logger.debug(`Running middleware/fetchData for route update ${routeUpdateStr}`);
             return Promise.resolve()
+                .then(() => perfMeasure('beforeresolve'))
                 .then(() => opts.middleware(to, from, store, app))
+                .then(() => perfMeasure('after-middleware'))
                 .then(() => Promise.all(components.map(fetchData)))
                 // Proxy results through the chain
-                .then(results => opts.postMiddleware(to, from, store, app).then(() => results))
-                // Call next with the first non-null resolved value from fetchData
-                .then(results => next(results.find(r => r != null)))
+                .then((results) => {
+                    perfMeasure('after-fetchdata');
+                    return opts.postMiddleware(to, from, store, app).then(() => {
+                        perfMeasure('after-post-middleware');
+                        // Call next with the first non-null resolved value from fetchData
+                        next(results.find(r => r != null));
+                    });
+                })
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');
                     opts.logger.error(e);
