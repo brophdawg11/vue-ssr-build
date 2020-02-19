@@ -5,6 +5,10 @@ const shouldIgnoreRouteUpdate = (c, args) => (
     c.shouldIgnoreRouteUpdate(args) === true
 );
 
+export function perfMeasure() {
+
+}
+
 export default function initializeClient(createApp, clientOpts) {
     const opts = {
         appSelector: '#app',
@@ -16,18 +20,24 @@ export default function initializeClient(createApp, clientOpts) {
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
+        perfMarkName: null,
         ...clientOpts,
     };
+
+    window.performance.mark('cat->pdp|start');
+    window.performance.measure('cat->pdp|after-fetch-data', 'cat->pdp|start');
+    window.performance.measure('cat->pdp|after-animate-out', 'cat->pdp|start');
+    window.performance.measure('cat->pdp|after-animate-in', 'cat->pdp|start');
+
 
     const ROUTING_MARK_NAME = 'client-side-route';
 
     function perfInit() {
-        if (!window.performance) {
+        if (!window.performance || clientOpts.perfMarkName !== 'function') {
             return;
         }
-        debugger;
         console.log('[perf] setting mark');
-        window.performance.mark(ROUTING_MARK_NAME);
+        window.performance.mark(clientOpts.perfMarkName('start', to, from));
     }
 
     function perfMeasure(name) {
@@ -160,8 +170,17 @@ export default function initializeClient(createApp, clientOpts) {
     // re-run fetchData for the SSR'd component
     router.onReady(() => {
         router.beforeEach((to, from, next) => {
-            perfInit();
+            const fetchDataArgs = { app, route: to, router, store, from };
+            const components = router.getMatchedComponents(to)
+                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
+
+            // Only measure performance for non-ignored route changed
+            if (components.length > 0) {
+                perfInit();
+            }
+
             next();
+            return null;
         });
 
         // Prior to resolving a route, execute any component fetchData methods.
