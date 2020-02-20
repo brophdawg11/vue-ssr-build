@@ -9,13 +9,7 @@ const shouldIgnoreRouteUpdate = (c, args) => (
 let enablePerfMarks = false;
 
 const PERF_PREFIX = 'urbnperf';
-const perfEnabled = () => (
-    enablePerfMarks &&
-    window.performance !== null &&
-    isFunction(window.performance.mark) &&
-    isFunction(window.performance.measure) &&
-    isFunction(window.performance.clearMarks)
-);
+const perfEnabled = () => enablePerfMarks && window.performance !== null;
 
 // Look up the current perf mark of the format urbnperf|*|start
 const getCurrentPerfMark = () => window.performance.getEntriesByType('mark')
@@ -40,6 +34,8 @@ function perfInit(to, from) {
     window.performance.mark(`${PERF_PREFIX}|${from.name}->${to.name}|start`);
 }
 
+// Issue a performance.measure call for the given name using the most recent
+// 'start' mark
 export function perfMeasure(name) {
     if (!perfEnabled()) {
         return;
