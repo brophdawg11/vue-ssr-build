@@ -5,6 +5,54 @@ const shouldIgnoreRouteUpdate = (c, args) => (
     c.shouldIgnoreRouteUpdate(args) === true
 );
 
+// To be toggled on via client options if desired
+let enablePerfMarks = false;
+
+const PERF_PREFIX = 'urbnperf';
+const perfEnabled = () => enablePerfMarks && window.performance !== null;
+
+// Look up the current perf mark of the format urbnperf|*|start
+const getCurrentPerfMark = () => window.performance.getEntriesByType('mark')
+    .find(m => m.name.startsWith(PERF_PREFIX) && m.name.endsWith('start'));
+
+function perfInit(to, from) {
+    if (!perfEnabled()) {
+        return;
+    }
+
+    // Always clear any prior measurements before starting a new one
+    window.performance.getEntriesByType('mark')
+        .filter(m => m.name.startsWith(PERF_PREFIX))
+        .forEach(m => window.performance.clearMarks(m.name));
+
+    window.performance.getEntriesByType('measure')
+        .filter(m => m.name.startsWith(PERF_PREFIX))
+        .forEach(m => window.performance.clearMeasures(m.name));
+
+    // Start a new routing operation with a mark such as:
+    //   urbnperf|Homepage->Catch-All|start
+    window.performance.mark(`${PERF_PREFIX}|${from.name}->${to.name}|start`);
+}
+
+// Issue a performance.measure call for the given name using the most recent
+// 'start' mark
+export function perfMeasure(name) {
+    if (!perfEnabled()) {
+        return;
+    }
+
+    const mark = getCurrentPerfMark();
+    if (!mark) {
+        // Can't measure if we don't have a starting mark to measure from
+        return;
+    }
+
+    // Add a measurement from the start mark with the current name.  Example:
+    //     urbnperf|Homepage->Catch-All|done
+    const [prefix, route] = mark.name.split('|');
+    window.performance.measure(`${prefix}|${route}|${name}`, mark.name);
+}
+
 export default function initializeClient(createApp, clientOpts) {
     const opts = {
         appSelector: '#app',
@@ -16,8 +64,12 @@ export default function initializeClient(createApp, clientOpts) {
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
+        enablePerfMarks: false,
         ...clientOpts,
     };
+
+    // Store off for closure scope usage
+    enablePerfMarks = opts.enablePerfMarks;
 
     let { initialState } = opts;
 
@@ -123,6 +175,20 @@ export default function initializeClient(createApp, clientOpts) {
     // Register the fetchData hook once the router is ready since we don't want to
     // re-run fetchData for the SSR'd component
     router.onReady(() => {
+
+        router.beforeEach((to, from, next) => {
+            const fetchDataArgs = { app, route: to, router, store, from };
+            const components = router.getMatchedComponents(to)
+                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
+
+            // Only measure performance for non-ignored route changed
+            if (components.length > 0) {
+                perfInit(to, from);
+            }
+
+            next();
+        });
+
         // Prior to resolving a route, execute any component fetchData methods.
         // Approach based on:
         //   https://ssr.vuejs.org/en/data.html#client-data-fetching
@@ -143,12 +209,17 @@ export default function initializeClient(createApp, clientOpts) {
 
             opts.logger.debug(`Running middleware/fetchData for route update ${routeUpdateStr}`);
             return Promise.resolve()
+                .then(() => perfMeasure('beforeResolve'))
                 .then(() => opts.middleware(to, from, store, app))
+                .then(() => perfMeasure('middleware-complete'))
                 .then(() => Promise.all(components.map(fetchData)))
                 // Proxy results through the chain
-                .then(results => opts.postMiddleware(to, from, store, app).then(() => results))
-                // Call next with the first non-null resolved value from fetchData
-                .then(results => next(results.find(r => r != null)))
+                .then((results) => {
+                    perfMeasure('fetchData-complete');
+                    return opts.postMiddleware(to, from, store, app)
+                        // Call next with the first non-null resolved value from fetchData
+                        .then(() => next(results.find(r => r != null)));
+                })
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');
                     opts.logger.error(e);
