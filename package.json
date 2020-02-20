@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "3.2.0",
+  "version": "4.1.0",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
