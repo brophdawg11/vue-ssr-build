@@ -1,61 +1,60 @@
-import { find, last, isFunction, isString } from 'lodash-es';
+import { find, isFunction, isString } from 'lodash-es';
 
 const shouldIgnoreRouteUpdate = (c, args) => (
     isFunction(c.shouldIgnoreRouteUpdate) &&
     c.shouldIgnoreRouteUpdate(args) === true
 );
 
-export const hasPerformanceAPI = () => {
-    if (!window.performance) {
-        return false;
-    }
+// To be toggled on via client options if desired
+let enablePerfMarks = false;
 
-    if (!isFunction(window.performance.mark) ||
-        !isFunction(window.performance.measure) ||
-        !isFunction(window.performance.clearMarks)) {
-        return false;
-    }
+const PERF_PREFIX = 'urbnperf';
+const perfEnabled = () => (
+    enablePerfMarks &&
+    window.performance !== null &&
+    isFunction(window.performance.mark) &&
+    isFunction(window.performance.measure) &&
+    isFunction(window.performance.clearMarks)
+);
 
-    return true;
-};
+// Look up the current perf mark of the format urbnperf|*|start
+const getCurrentPerfMark = () => window.performance.getEntriesByType('mark')
+    .find(m => m.name.startsWith(PERF_PREFIX) && m.name.endsWith('start'));
 
-export const BEFORE_EACH_MARK_NAME = 'beforeEach';
-
-function perfInit(to, from, nameGenerator) {
-    if (!hasPerformanceAPI()) {
+function perfInit(to, from) {
+    if (!perfEnabled()) {
         return;
     }
 
-    window.performance.mark(nameGenerator(BEFORE_EACH_MARK_NAME, to, from));
-}
-
-export function perfMeasure(name, to, from, nameGenerator) {
-    if (!nameGenerator || !hasPerformanceAPI()) {
-        return;
-    }
-
-    const startingMark =
-        last(window.performance.getEntriesByName(nameGenerator(BEFORE_EACH_MARK_NAME, to, from)));
-
-    if (!startingMark) {
-        // do something else?
-        return;
-    }
-
-    window.performance.measure(
-        nameGenerator(name, to, from),
-        nameGenerator(BEFORE_EACH_MARK_NAME, to, from),
-    );
-}
-
-export function perfClear() {
-    if (!hasPerformanceAPI()) {
-        return;
-    }
-
+    // Always clear any prior measurements before starting a new one
     window.performance.getEntriesByType('mark')
-        .filter(m => m.name.startsWith(BEFORE_EACH_MARK_NAME))
+        .filter(m => m.name.startsWith(PERF_PREFIX))
         .forEach(m => window.performance.clearMarks(m.name));
+
+    window.performance.getEntriesByType('measure')
+        .filter(m => m.name.startsWith(PERF_PREFIX))
+        .forEach(m => window.performance.clearMeasures(m.name));
+
+    // Start a new routing operation with a mark such as:
+    //   urbnperf|Homepage->Catch-All|start
+    window.performance.mark(`${PERF_PREFIX}|${from.name}->${to.name}|start`);
+}
+
+export function perfMeasure(name) {
+    if (!perfEnabled()) {
+        return;
+    }
+
+    const mark = getCurrentPerfMark();
+    if (!mark) {
+        // Can't measure if we don't have a starting mark to measure from
+        return;
+    }
+
+    // Add a measurement from the start mark with the current name.  Example:
+    //     urbnperf|Homepage->Catch-All|done
+    const [prefix, route] = mark.name.split('|');
+    window.performance.measure(`${prefix}|${route}|${name}`, mark.name);
 }
 
 export default function initializeClient(createApp, clientOpts) {
@@ -69,9 +68,12 @@ export default function initializeClient(createApp, clientOpts) {
         middleware: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
-        perfNameGenerator: null,
+        enablePerfMarks: false,
         ...clientOpts,
     };
+
+    // Store off for closure scope usage
+    enablePerfMarks = opts.enablePerfMarks;
 
     let { initialState } = opts;
 
@@ -179,18 +181,13 @@ export default function initializeClient(createApp, clientOpts) {
     router.onReady(() => {
 
         router.beforeEach((to, from, next) => {
-            if (!isFunction(opts.perfNameGenerator)) {
-                next();
-                return;
-            }
-
             const fetchDataArgs = { app, route: to, router, store, from };
             const components = router.getMatchedComponents(to)
                 .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
 
             // Only measure performance for non-ignored route changed
             if (components.length > 0) {
-                perfInit(to, from, opts.perfNameGenerator);
+                perfInit(to, from);
             }
 
             next();
@@ -200,6 +197,7 @@ export default function initializeClient(createApp, clientOpts) {
         // Approach based on:
         //   https://ssr.vuejs.org/en/data.html#client-data-fetching
         router.beforeResolve((to, from, next) => {
+            perfMeasure('beforeResolve');
             const routeUpdateStr = `${from.fullPath} -> ${to.fullPath}`;
             const fetchDataArgs = { app, route: to, router, store, from };
             // Call fetchData for any routes that define it, otherwise resolve with
@@ -216,17 +214,15 @@ export default function initializeClient(createApp, clientOpts) {
 
             opts.logger.debug(`Running middleware/fetchData for route update ${routeUpdateStr}`);
             return Promise.resolve()
-                .then(() => perfMeasure('beforeResolve', to, from, opts.perfNameGenerator))
                 .then(() => opts.middleware(to, from, store, app))
-                .then(() => perfMeasure('afterMiddleware', to, from, opts.perfNameGenerator))
+                .then(() => perfMeasure('middleware-complete'))
                 .then(() => Promise.all(components.map(fetchData)))
                 // Proxy results through the chain
-                .then((fetchDataResults) => {
-                    perfMeasure('afterFetchData', to, from, opts.perfNameGenerator);
-
-                    return opts.postMiddleware(to, from, store, app).then(() => fetchDataResults)
+                .then((results) => {
+                    perfMeasure('fetchData-complete');
+                    return opts.postMiddleware(to, from, store, app)
                         // Call next with the first non-null resolved value from fetchData
-                        .then(middlewareResults => next(middlewareResults.find(r => r != null)));
+                        .then(() => next(results.find(r => r != null)));
                 })
                 .catch((e) => {
                     opts.logger.error('Error fetching component data, preventing routing');
