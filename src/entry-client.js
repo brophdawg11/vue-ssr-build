@@ -193,7 +193,6 @@ export default function initializeClient(createApp, clientOpts) {
         // Approach based on:
         //   https://ssr.vuejs.org/en/data.html#client-data-fetching
         router.beforeResolve((to, from, next) => {
-            perfMeasure('beforeResolve');
             const routeUpdateStr = `${from.fullPath} -> ${to.fullPath}`;
             const fetchDataArgs = { app, route: to, router, store, from };
             // Call fetchData for any routes that define it, otherwise resolve with
@@ -210,6 +209,7 @@ export default function initializeClient(createApp, clientOpts) {
 
             opts.logger.debug(`Running middleware/fetchData for route update ${routeUpdateStr}`);
             return Promise.resolve()
+                .then(() => perfMeasure('beforeResolve'))
                 .then(() => opts.middleware(to, from, store, app))
                 .then(() => perfMeasure('middleware-complete'))
                 .then(() => Promise.all(components.map(fetchData)))
