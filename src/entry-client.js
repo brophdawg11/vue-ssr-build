@@ -99,10 +99,10 @@ export default function initializeClient(createApp, clientOpts) {
 
         // Allow a function to be passed that can generate a route-aware
         // module name
-        const getModuleName = (c, route) => (
-            isFunction(c.vuex.moduleName) ?
-                c.vuex.moduleName({ $route: route }) :
-                c.vuex.moduleName
+        const getModuleName = (moduleName, route) => (
+            isFunction(moduleName) ?
+                moduleName({ $route: route }) :
+                moduleName
         );
 
         // Before routing, register any dynamic Vuex modules for new components
@@ -112,8 +112,10 @@ export default function initializeClient(createApp, clientOpts) {
                 router.getMatchedComponents(to)
                     .filter(c => 'vuex' in c)
                     .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
-                    .forEach((c) => {
-                        const name = getModuleName(c, to);
+                    .map(c => c.vuex)
+                    .reduce((acc, xorxs) => acc.concat(xorxs), [])
+                    .forEach(({ moduleName, module }) => {
+                        const name = getModuleName(moduleName, to);
                         const existingModule = find(registeredModules, { name });
                         if (existingModule) {
                             // We already have this module registered, update the
@@ -122,7 +124,7 @@ export default function initializeClient(createApp, clientOpts) {
                             existingModule.index = moduleIndex++;
                         } else {
                             opts.logger.info('Registering dynamic Vuex module:', name);
-                            store.registerModule(name, c.vuex.module, {
+                            store.registerModule(name, module, {
                                 preserveState: store.state[name] != null,
                             });
                             registeredModules.push({ name, index: moduleIndex++ });
@@ -142,12 +144,16 @@ export default function initializeClient(createApp, clientOpts) {
             const fetchDataArgs = { app, route: to, router, store, from };
             const toModuleNames = router.getMatchedComponents(to)
                 .filter(c => 'vuex' in c)
-                .map(c => getModuleName(c, to));
+                .map(c => c.vuex)
+                .reduce((acc, xorxs) => acc.concat(xorxs), [])
+                .map(({ moduleName }) => getModuleName(moduleName, to));
             router.getMatchedComponents(from)
                 .filter(c => 'vuex' in c)
                 .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
-                .forEach((c) => {
-                    const fromModuleName = getModuleName(c, from);
+                .map(c => c.vuex)
+                .reduce((acc, xorxs) => acc.concat(xorxs), [])
+                .forEach(({ moduleName }) => {
+                    const fromModuleName = getModuleName(moduleName, from);
 
                     // After every routing operation, perform available cleanup
                     // of registered modules, keeping around up to a specified
