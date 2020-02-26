@@ -9,7 +9,11 @@ const shouldIgnoreRouteUpdate = (c, args) => (
 let enablePerfMarks = false;
 
 const PERF_PREFIX = 'urbnperf';
-const perfEnabled = () => enablePerfMarks && window.performance !== null;
+const perfEnabled = () => (
+    enablePerfMarks &&
+    window.performance !== null &&
+    isFunction(window.performance.getEntriesByType)
+);
 
 // Look up the current perf mark of the format urbnperf|*|start
 const getCurrentPerfMark = () => window.performance.getEntriesByType('mark')
