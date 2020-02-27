@@ -42,19 +42,19 @@ function perfInit(to, from) {
 // 'start' mark
 export function perfMeasure(name) {
     if (!perfEnabled()) {
-        return;
+        return null;
     }
 
     const mark = getCurrentPerfMark();
     if (!mark) {
         // Can't measure if we don't have a starting mark to measure from
-        return;
+        return null;
     }
 
     // Add a measurement from the start mark with the current name.  Example:
     //     urbnperf|Homepage->Catch-All|done
     const [prefix, route] = mark.name.split('|');
-    window.performance.measure(`${prefix}|${route}|${name}`, mark.name);
+    return window.performance.measure(`${prefix}|${route}|${name}`, mark.name);
 }
 
 export default function initializeClient(createApp, clientOpts) {
