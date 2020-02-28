@@ -7,6 +7,7 @@ export default function initializeServer(createApp, serverOpts) {
         logger: console,
         preMiddleware: () => Promise.resolve(),
         middleware: () => Promise.resolve(),
+        globalFetchData: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         ...serverOpts,
     };
@@ -46,18 +47,22 @@ export default function initializeServer(createApp, serverOpts) {
                         });
                 }
 
-                const fetchData = c => c.fetchData && c.fetchData({
+                const fetchDataArgs = {
                     ssrContext: context,
                     app,
                     route: router.currentRoute,
                     router,
                     store,
-                });
+                };
+                const fetchData = c => c.fetchData && c.fetchData(fetchDataArgs);
 
                 // Execute all provided middleware prior to fetchData
                 return Promise.resolve()
                     .then(() => opts.middleware(context, app, router, store))
-                    .then(() => Promise.all(components.map(fetchData)))
+                    .then(() => Promise.all([
+                        opts.globalFetchData(fetchDataArgs),
+                        ...components.map(fetchData),
+                    ]))
                     .then(() => opts.postMiddleware(context, app, router, store))
                     // Set initialState and translations to be embedded into
                     // the template for client hydration
