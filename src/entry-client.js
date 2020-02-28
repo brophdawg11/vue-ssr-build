@@ -62,6 +62,7 @@ export default function initializeClient(createApp, clientOpts) {
         vuexModules: true,
         maxVuexModules: 2,
         middleware: () => Promise.resolve(),
+        globalFetchData: () => Promise.resolve(),
         postMiddleware: () => Promise.resolve(),
         logger: console,
         enablePerfMarks: false,
@@ -212,7 +213,10 @@ export default function initializeClient(createApp, clientOpts) {
                 .then(() => perfMeasure('beforeResolve'))
                 .then(() => opts.middleware(to, from, store, app))
                 .then(() => perfMeasure('middleware-complete'))
-                .then(() => Promise.all(components.map(fetchData)))
+                .then(() => Promise.all([
+                    opts.globalFetchData(fetchDataArgs),
+                    ...components.map(fetchData),
+                ]))
                 // Proxy results through the chain
                 .then((results) => {
                     perfMeasure('fetchData-complete');
