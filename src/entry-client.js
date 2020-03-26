@@ -42,19 +42,26 @@ function perfInit(to, from) {
 // 'start' mark
 export function perfMeasure(name) {
     if (!perfEnabled()) {
-        return null;
+        return false;
     }
 
     const mark = getCurrentPerfMark();
     if (!mark) {
         // Can't measure if we don't have a starting mark to measure from
-        return null;
+        return false;
     }
 
     // Add a measurement from the start mark with the current name.  Example:
     //     urbnperf|Homepage->Catch-All|done
     const [prefix, route] = mark.name.split('|');
-    return window.performance.measure(`${prefix}|${route}|${name}`, mark.name);
+    window.performance.measure(`${prefix}|${route}|${name}`, mark.name);
+
+    // return true here to indicate that we logged the measurement, but do not
+    // attempt to return the measure object itself because it is not returned
+    // from window.performance.measure according to the spec.  Some browsers
+    // seem to return it our of convenience, but specifically mobile safari does
+    // not
+    return true;
 }
 
 export default function initializeClient(createApp, clientOpts) {
