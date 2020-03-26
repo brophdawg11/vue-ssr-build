@@ -1,6 +1,5 @@
 const webpack = require('webpack');
 const merge = require('webpack-merge');
-const VisualizerPlugin = require('webpack-visualizer-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
@@ -33,7 +32,6 @@ module.exports = function getClientConfig(configOpts) {
         plugins: [
             new webpack.DefinePlugin({ 'process.env.VUE_ENV': '"client"' }),
             new VueSSRClientPlugin(),
-            new VisualizerPlugin(),
         ],
         ...(config.extractCss && isProd ? {
             optimization: {
