@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "4.2.1",
+  "version": "4.3.0",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
@@ -64,8 +64,7 @@
     "webpack-dev-middleware": "3.7.2",
     "webpack-hot-middleware": "2.25.0",
     "webpack-hot-server-middleware": "0.6.0",
-    "webpack-merge": "4.2.2",
-    "webpack-visualizer-plugin": "0.1.11"
+    "webpack-merge": "4.2.2"
   },
   "peerDependencies": {
     "lru-cache": "^5.1.1",

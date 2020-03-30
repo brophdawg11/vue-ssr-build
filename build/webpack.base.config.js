@@ -116,6 +116,9 @@ module.exports = {
                         // Allow a15-js-service and vue-ssr-build to be run through
                         // babel since we don't pre-transpile them
                         exclude: /node_modules\/(?!(a15-js-service|vue-ssr-build)\/).*/,
+                        options: {
+                            cacheDirectory: true,
+                        },
                     }] : []),
 
                     {
