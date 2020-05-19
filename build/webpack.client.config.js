@@ -20,6 +20,7 @@ module.exports = function getClientConfig(configOpts) {
         sassLoaderData: null,
         babelLoader: true,
         terserOptions: null,
+        terserPluginOptions: null,
         svgInlineLoaderOptions: null,
         ...configOpts,
     };
@@ -41,6 +42,7 @@ module.exports = function getClientConfig(configOpts) {
                             safari10: true,
                             ...config.terserOptions,
                         },
+                        ...config.terserPluginOptions,
                     }),
                     // Minimize extracted CSS files
                     new OptimizeCSSAssetsPlugin({}),
