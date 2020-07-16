@@ -23,8 +23,11 @@ export default function initializeServer(createApp, serverOpts) {
                 const components = router.getMatchedComponents();
 
                 if (!components.length) {
-                    opts.logger.warn(`No matched components for route: ${context.request.url}`);
-                    return reject({ code: 404, message: 'Not Found' });
+                    return reject({
+                        code: 404,
+                        message: 'Not Found',
+                        data: `No matched components for route: ${context.request.url}`,
+                    });
                 }
 
                 if (opts.vuexModules) {
@@ -83,15 +86,15 @@ export default function initializeServer(createApp, serverOpts) {
                     .then(() => resolve(app))
                     .catch((e) => {
                         opts.logger.log('Error in middleware chain', e);
-                        return reject(e || new Error('Unknown Error from middleware'));
+                        return reject(e);
                     });
             }, (e) => {
                 opts.logger.log('Router rejected onReady callback', e);
-                return reject(e || new Error('Unknown Error from onReady'));
+                return reject(e);
             });
         })
         .catch((e) => {
             opts.logger.log('Error in preMiddleware chain', e);
-            return reject(e || new Error('Unknown Error from preMiddleware'));
+            return reject(e);
         }));
 }
