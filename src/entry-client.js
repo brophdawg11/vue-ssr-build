@@ -1,6 +1,10 @@
-import { find, isFunction, isString } from 'lodash-es';
+import { get, find, isFunction, isString } from 'lodash-es';
 
+// We only ignore route updates between when routing between the same entries
+// in the routing table (i.e., Catch-All->Catch-All or PDP->PDP).  Never ignore
+// route updates between routing table entries.
 const shouldIgnoreRouteUpdate = (c, args) => (
+    get(args, 'from.name') === get(args, 'route.name') &&
     isFunction(c.shouldIgnoreRouteUpdate) &&
     c.shouldIgnoreRouteUpdate(args) === true
 );
