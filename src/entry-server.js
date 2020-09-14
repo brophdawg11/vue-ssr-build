@@ -75,12 +75,24 @@ export default function initializeServer(createApp, serverOpts) {
                         //   https://v8.dev/blog/cost-of-javascript-2019#json
                         initialState: JSON.stringify(JSON.stringify(
                             store.state,
-                            // Convert all undefined values to null's during stringification.
-                            // Default behavior of JSON.stringify is to strip undefined values,
-                            // which breaks client side hydration because Vue won't make the
-                            // property reactive. See:
-                            //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#Description
-                            (k, v) => (v === undefined ? null : v),
+                            // Custom JSON.stringify replacer function to do 2 things:
+                            // * Convert any `_ssr_` prefixed keys to undefined values so
+                            //   they get stripped.  These properties are strictly for SSR
+                            //   memoization of non-reactive expensive getter methods
+                            // * Convert all undefined values to null's during stringification.
+                            //   Default behavior of JSON.stringify is to strip undefined values,
+                            //   which breaks client side hydration because Vue won't make the
+                            //   property reactive. See:
+                            //     https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#Description
+                            (k, v) => {
+                                if (k.startsWith('_ssr_')) {
+                                    return undefined;
+                                }
+                                if (v === undefined) {
+                                    return null;
+                                }
+                                return v;
+                            },
                         )),
                     }))
                     .then(() => resolve(app))
