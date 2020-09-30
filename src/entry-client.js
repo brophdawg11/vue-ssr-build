@@ -240,7 +240,7 @@ export default function initializeClient(createApp, clientOpts) {
                         .then(() => next(results.find(r => r != null)));
                 })
                 .catch((e) => {
-                    opts.logger.error('Error fetching component data, preventing routing', e);
+                    opts.logger.warn('Error fetching component data, preventing routing', e);
                     if (e instanceof Error) {
                         next(e);
                     } else if (typeof e === 'string') {
