@@ -23,7 +23,6 @@ const errorHandler = (err, res, cb) => {
 const defaults = {
     name: 'default',
     errorHandler,
-    i18nDirective: false,
     isLocal: process.env.NODE_ENV === 'local',
     isDev: process.env.NODE_ENV === 'development',
     isProd: process.env.NODE_ENV === 'production',
@@ -48,10 +47,6 @@ const renderers = {};
 let readyPromise;
 
 function createRenderer(bundle, options, config) {
-    const t = config.i18nDirective ?
-        require('vue-i18n-extensions').directive :
-        null;
-
     if (caches[config.name]) {
         config.logger.debug(
             `Recreating the "${config.name}" Vue SSR BundleRenderer, clearing`,
@@ -86,8 +81,6 @@ function createRenderer(bundle, options, config) {
     return createBundleRenderer(bundle, Object.assign(options, {
         cache: caches[config.name],
         runInNewContext: false,
-        // Only include the t directive when specified
-        ...(t ? { directives: { t } } : {}),
     }, config.rendererOpts));
 }
 

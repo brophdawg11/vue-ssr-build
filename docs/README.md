@@ -26,12 +26,12 @@ This package attempts to provide a core set of functionality for Vue SSR apps, i
 
 ## Currently Supported Versions
 
-* `eslint@4.19.1`
-* `jest@23.1.0`
-* `vue@2.5.16`
-* `vue-loader@15.2.4`
-* `vue-server-renderer@2.5.16`
-* `webpack@4.10.2`
+* `eslint@6.8.0`
+* `jest@24.9.0`
+* `vue@2.6.12`
+* `vue-loader@15.8.3`
+* `vue-server-renderer@2.6.12`
+* `webpack@4.41.5`
 
 
 ## Why?
