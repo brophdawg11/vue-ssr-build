@@ -105,7 +105,7 @@ module.exports = {
                     // Only include the i18n-loader if specified
                     ...(config.i18nBlocks ? [{
                         resourceQuery: /blockType=i18n/,
-                        loader: '@kazupon/vue-i18n-loader',
+                        loader: '@intlify/vue-i18n-loader',
                     }] : []),
 
                     // Only include babelLoader if specified - useful to turn
