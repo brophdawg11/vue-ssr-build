@@ -130,23 +130,22 @@ export default function initializeClient(createApp, clientOpts) {
                     .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
                     .forEach((c) => {
                         const name = getModuleName(c, to);
-                        const existingModule = get(store, `_modulesNamespaceMap.${name}/`);
+                        const existingModule = find(registeredModules, { name });
                         if (existingModule) {
+                            // We already have this module registered, update the
+                            // index to mark it as recent
                             opts.logger.info('Skipping duplicate Vuex module registration:', name);
-                            // If the module was registered outside of the routing flow,
-                            // we need to add it to registeredModules.
-                            // Otherwise we will update the index to mark it as recent
-                            const registeredModule = find(registeredModules, { name });
-                            if (!registeredModule) {
-                                registeredModules.push({ name, index: moduleIndex++ });
-                            } else {
-                                registeredModule.index = moduleIndex++;
-                            }
+                            existingModule.index = moduleIndex++;
                         } else {
                             opts.logger.info('Registering dynamic Vuex module:', name);
-                            store.registerModule(name, c.vuex.module, {
-                                preserveState: store.state[name] != null,
-                            });
+                            // This module may have been registered outside of the
+                            // routing flow, so only register it with Vuex if needed -
+                            // but add it to our tracking of registeredModules regardless
+                            if (get(store, `_modulesNamespaceMap.${name}/`) == null) {
+                                store.registerModule(name, c.vuex.module, {
+                                    preserveState: store.state[name] != null,
+                                });
+                            }
                             registeredModules.push({ name, index: moduleIndex++ });
                         }
                     });
