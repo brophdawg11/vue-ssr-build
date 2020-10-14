@@ -130,7 +130,7 @@ export default function initializeClient(createApp, clientOpts) {
                     .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
                     .forEach((c) => {
                         const name = getModuleName(c, to);
-                        const existingModule = find(registeredModules, { name });
+                        const existingModule = get(store, `_modulesNamespaceMap.${name}/`);
                         if (existingModule) {
                             // We already have this module registered, update the
                             // index to mark it as recent
