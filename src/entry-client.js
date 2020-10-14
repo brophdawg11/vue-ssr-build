@@ -132,10 +132,16 @@ export default function initializeClient(createApp, clientOpts) {
                         const name = getModuleName(c, to);
                         const existingModule = get(store, `_modulesNamespaceMap.${name}/`);
                         if (existingModule) {
-                            // We already have this module registered, update the
-                            // index to mark it as recent
                             opts.logger.info('Skipping duplicate Vuex module registration:', name);
-                            existingModule.index = moduleIndex++;
+                            // If the module was registered outside of the routing flow,
+                            // we need to add it to registeredModules.
+                            // Otherwise we will update the index to mark it as recent
+                            const registeredModule = find(registeredModules, { name });
+                            if (!registeredModule) {
+                                registeredModules.push({ name, index: moduleIndex++ });
+                            } else {
+                                registeredModule.index = moduleIndex++;
+                            }
                         } else {
                             opts.logger.info('Registering dynamic Vuex module:', name);
                             store.registerModule(name, c.vuex.module, {
