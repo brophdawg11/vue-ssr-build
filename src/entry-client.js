@@ -138,9 +138,14 @@ export default function initializeClient(createApp, clientOpts) {
                             existingModule.index = moduleIndex++;
                         } else {
                             opts.logger.info('Registering dynamic Vuex module:', name);
-                            store.registerModule(name, c.vuex.module, {
-                                preserveState: store.state[name] != null,
-                            });
+                            // This module may have been registered outside of the
+                            // routing flow, so only register it with Vuex if needed -
+                            // but add it to our tracking of registeredModules regardless
+                            if (get(store, `_modulesNamespaceMap.${name}/`) == null) {
+                                store.registerModule(name, c.vuex.module, {
+                                    preserveState: store.state[name] != null,
+                                });
+                            }
                             registeredModules.push({ name, index: moduleIndex++ });
                         }
                     });
