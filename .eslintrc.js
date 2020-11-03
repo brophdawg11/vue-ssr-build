@@ -3,7 +3,7 @@
 module.exports = {
     root: true,
     parserOptions: {
-        parser: 'babel-eslint',
+        parser: '@babel/eslint-parser',
         sourceType: 'module'
     },
     env: {
@@ -15,6 +15,7 @@ module.exports = {
         'plugin:vue/recommended'
     ],
     plugins: [
+        '@babel',
         'vue',
     ],
     rules: {
