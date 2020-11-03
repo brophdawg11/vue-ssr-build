@@ -3,8 +3,8 @@
 module.exports = {
     root: true,
     parserOptions: {
-        parser: 'babel-eslint',
-        sourceType: 'module'
+        parser: '@babel/eslint-parser',
+        sourceType: 'module',
     },
     env: {
         browser: true,
@@ -12,7 +12,7 @@ module.exports = {
     },
     extends: [
         'airbnb-base',
-        'plugin:vue/recommended'
+        'plugin:vue/recommended',
     ],
     plugins: [
         'vue',
@@ -21,13 +21,13 @@ module.exports = {
         // Kept from airbnb-base@13, that switched to 'always' in 14
         'arrow-parens': ['error', 'as-needed', { requireForBlockBody: true }],
         // 4 space indent
-        'indent': [ 'error', 4 ],
+        indent: ['error', 4],
         // Don't enforce newlines on function parens
         'function-paren-newline': 'off',
         // Max length 0f 80 characters in source code
         'max-len': ['error', {
             code: 100,
-            ignoreUrls: true
+            ignoreUrls: true,
         }],
         // Don't allow console.*, force logger usage
         'no-console': 'error',
@@ -51,11 +51,11 @@ module.exports = {
         // Allow max 2 attributes on a single line element, but once the
         // element is spread across multiple, require one attribute per line
         'vue/max-attributes-per-line': ['error', {
-            'singleline': 3,
-            'multiline': {
-                'max': 1,
-                'allowFirstLine': true
-            }
-        }]
+            singleline: 3,
+            multiline: {
+                max: 1,
+                allowFirstLine: true,
+            },
+        }],
     },
-}
+};
