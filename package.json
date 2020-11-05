@@ -59,7 +59,7 @@
     "vue-template-compiler": "2.6.12",
     "vue-themed-style-loader": "0.3.0",
     "webpack": "4.41.5",
-    "webpack-cli": "3.3.10",
+    "webpack-cli": "4.2.0",
     "webpack-dev-middleware": "3.7.2",
     "webpack-hot-middleware": "2.25.0",
     "webpack-hot-server-middleware": "0.6.1",
