@@ -187,7 +187,7 @@ module.exports = {
                     new MiniCssExtractPlugin({
                         filename: isProd ? 'app.[contenthash].css' : 'app.css',
                         chunkFilename: isProd ? '[name].[contenthash].css' : '[name].css',
-                        insertInto: config.insertInto,
+                        insert: config.cssInsert,
                     }),
                 ] : []),
             ],

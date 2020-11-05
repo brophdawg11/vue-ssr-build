@@ -41,7 +41,7 @@
     "jest-serializer-vue": "2.0.2",
     "lodash-es": "4.17.15",
     "lru-cache": "6.0.0",
-    "mini-css-extract-plugin": "github:brophdawg11/mini-css-extract-plugin#urbn",
+    "mini-css-extract-plugin": "1.2.1",
     "node-sass": "4.13.1",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "postcss-loader": "4.0.4",
