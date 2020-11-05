@@ -39,7 +39,6 @@ function getCssLoaders(config) {
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            cssLoaders[0].options.onlyLocals = true;
             return [...cssLoaders];
         }
 
