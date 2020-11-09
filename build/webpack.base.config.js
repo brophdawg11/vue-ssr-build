@@ -29,6 +29,9 @@ function getCssLoaders(config) {
         {
             loader: 'css-loader',
             options: {
+                // Required to work with css-loader@4
+                // https://github.com/vuejs/vue-style-loader/issues/46#issuecomment-670624576
+                esModule: false,
                 // Number of loaders applied prior to css-loader
                 // See https://vue-loader.vuejs.org/guide/pre-processors.html#postcss
                 importLoaders: addlLoaders.length,
