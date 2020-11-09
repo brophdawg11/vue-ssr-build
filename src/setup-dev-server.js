@@ -65,11 +65,7 @@ module.exports = function setupDevServer(app, config, cb) {
     // dev middleware
     console.error('Launching client webpack build');
     const clientCompiler = webpack(clientConfig);
-    const devMiddleware = webpackDevMiddleware(clientCompiler, {
-        publicPath: clientConfig.output.publicPath,
-        noInfo: true,
-        stats: 'minimal',
-    });
+    const devMiddleware = webpackDevMiddleware(clientCompiler);
     app.use(devMiddleware);
     clientCompiler.plugin('done', (stats) => {
         console.error('Completed client webpack build');
