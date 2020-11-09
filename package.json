@@ -47,7 +47,7 @@
     "postcss-loader": "4.0.4",
     "sass-loader": "8.0.2",
     "svg-inline-loader": "0.8.2",
-    "svg-url-loader": "3.0.3",
+    "svg-url-loader": "6.0.0",
     "tar": "4.4.8",
     "terser-webpack-plugin": "2.3.8",
     "url-loader": "4.1.1",
