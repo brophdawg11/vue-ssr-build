@@ -39,8 +39,12 @@ function shouldProcessRouteUpdate(c, fetchDataArgs, spruDefaults) {
         return c.shouldProcessRouteUpdate(fetchDataArgs) === true;
     }
 
-    // Otherwise, use the defaults and override with any component opts
-    const { path, query, hash } = Object.assign(spruDefaults, c.shouldProcessRouteUpdate);
+    // Otherwise, use the defaults and override with any component opts.  Shallow
+    // clone here so we don't persist anything from route to route
+    const { path, query, hash } = {
+        ...spruDefaults,
+        ...c.shouldProcessRouteUpdate,
+    };
 
     return (
         (path === true && get(from, 'path') !== get(route, 'path')) ||
