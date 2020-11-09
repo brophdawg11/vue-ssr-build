@@ -39,7 +39,10 @@ function getCssLoaders(config) {
 
     if (config.type === 'server') {
         if (config.extractCss) {
-            cssLoaders[0].options.onlyLocals = true;
+            if (!cssLoaders[0].options.modules) {
+                cssLoaders[0].options.modules = {};
+            }
+            cssLoaders[0].options.modules.exportOnlyLocals = true;
             return [...cssLoaders];
         }
 
