@@ -5,7 +5,7 @@
 ```javascript
 // build/webpack.client.config.js
 const { join } = require('path');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const getClientConfig = require('vue-ssr-build/build/webpack.client.config');
 
 // Configuration options that can be passed to getClientConfig
@@ -31,7 +31,7 @@ module.exports = merge(getClientConfig(configOpts), {
 ```javascript
 // build/webpack.server.config.js
 const { join } = require('path');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const getServerConfig = require('vue-ssr-build/build/webpack.server.config');
 
 // Configuration options that can be passed to getServerConfig
