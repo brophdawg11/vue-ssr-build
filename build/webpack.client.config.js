@@ -12,7 +12,7 @@ module.exports = function getClientConfig(configOpts) {
         type: 'client',
         rootDir: null,
         extractCss: false,
-        insertInto: null,
+        cssInsert: null,
         enablePostCss: false,
         postCssOpts: null,
         i18nBlocks: false,
