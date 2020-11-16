@@ -1,13 +1,57 @@
-import { get, find, isFunction, isString } from 'lodash-es';
+import { get, find, isEqual, isFunction, isString } from 'lodash-es';
 
-// We only ignore route updates between when routing between the same entries
-// in the routing table (i.e., Catch-All->Catch-All or PDP->PDP).  Never ignore
-// route updates between routing table entries.
-const shouldIgnoreRouteUpdate = (c, args) => (
-    get(args, 'from.name') === get(args, 'route.name') &&
-    isFunction(c.shouldIgnoreRouteUpdate) &&
-    c.shouldIgnoreRouteUpdate(args) === true
-);
+/**
+ * Determine if we should run our middlewares and fetchData for a given routing
+ * operation.  This is a component-level specification that has two formats:
+ *
+ * // Object-shorthand
+ * shouldProcessrouteUpdate: {
+ *     path: true,    // Process updates if route.path changes
+ *     query: false,  // Do not process route.query changes
+ *     hash: false,   // Do not process route.hash changes
+ * }
+ *
+ * // Function long form
+ * shouldProcessRouteUpdate(fetchDataArgs) {
+ *     // View-specific complex logic here
+ * }
+ *
+ * You can also provide global defaults for the object shorthand via the config
+ * options in initializeClient.  If not passed, they will default to the above
+ * (only process path changes)
+ *
+ * @param   {object} c             Vue component definition object for destination route
+ * @param   {object} fetchDataArgs Context argument passed to fetchData
+ * @param   {object} spruDefaults  Defaults from initializeClient
+ * @returns {boolean}              True if we should process this route update through the
+ *                                 fetchData/middleware pipeline
+ */
+function shouldProcessRouteUpdate(c, fetchDataArgs, spruDefaults) {
+    const { from, route } = fetchDataArgs;
+
+    // Always process route updates when going between routing table entries
+    if (get(from, 'name') !== get(route, 'name')) {
+        return true;
+    }
+
+    // If the component specifies a function, use it
+    if (isFunction(c.shouldProcessRouteUpdate)) {
+        return c.shouldProcessRouteUpdate(fetchDataArgs) === true;
+    }
+
+    // Otherwise, use the defaults and override with any component opts.  Shallow
+    // clone here so we don't persist anything from route to route
+    const { path, query, hash } = {
+        ...spruDefaults,
+        ...c.shouldProcessRouteUpdate,
+    };
+
+    return (
+        (path === true && get(from, 'path') !== get(route, 'path')) ||
+        (query === true && !isEqual(get(from, 'query'), get(route, 'query'))) ||
+        (hash === true && get(from, 'hash') !== get(route, 'hash'))
+    );
+}
 
 // To be toggled on via client options if desired
 let enablePerfMarks = false;
@@ -81,12 +125,19 @@ export default function initializeClient(createApp, clientOpts) {
         postMiddleware: () => Promise.resolve(),
         logger: console,
         enablePerfMarks: false,
+        // By default, only run fetchData middlewares on path changes
+        shouldProcessRouteUpdateDefaults: {
+            path: true,
+            query: false,
+            hash: false,
+        },
         ...clientOpts,
     };
 
     // Store off for closure scope usage
     enablePerfMarks = opts.enablePerfMarks;
 
+    const { shouldProcessRouteUpdateDefaults: spruDefaults } = opts;
     let { initialState } = opts;
 
     if (isString(opts.initialStateMetaTag)) {
@@ -127,7 +178,7 @@ export default function initializeClient(createApp, clientOpts) {
                 const fetchDataArgs = { app, route: to, router, store, from };
                 router.getMatchedComponents(to)
                     .filter(c => 'vuex' in c)
-                    .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
+                    .filter(c => shouldProcessRouteUpdate(c, fetchDataArgs, spruDefaults))
                     .forEach((c) => {
                         const name = getModuleName(c, to);
                         const existingModule = find(registeredModules, { name });
@@ -166,7 +217,7 @@ export default function initializeClient(createApp, clientOpts) {
                 .map(c => getModuleName(c, to));
             router.getMatchedComponents(from)
                 .filter(c => 'vuex' in c)
-                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs))
+                .filter(c => shouldProcessRouteUpdate(c, fetchDataArgs, spruDefaults))
                 .forEach((c) => {
                     const fromModuleName = getModuleName(c, from);
 
@@ -200,7 +251,7 @@ export default function initializeClient(createApp, clientOpts) {
         router.beforeEach((to, from, next) => {
             const fetchDataArgs = { app, route: to, router, store, from };
             const components = router.getMatchedComponents(to)
-                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
+                .filter(c => shouldProcessRouteUpdate(c, fetchDataArgs, spruDefaults));
 
             // Only measure performance for non-ignored route changed
             if (components.length > 0) {
@@ -220,7 +271,7 @@ export default function initializeClient(createApp, clientOpts) {
             // null to allow routing via next(null)
             const fetchData = c => (isFunction(c.fetchData) ? c.fetchData(fetchDataArgs) : null);
             const components = router.getMatchedComponents(to)
-                .filter(c => !shouldIgnoreRouteUpdate(c, fetchDataArgs));
+                .filter(c => shouldProcessRouteUpdate(c, fetchDataArgs, spruDefaults));
 
             // Short circuit if none of our components need to process the route update
             if (components.length === 0) {
