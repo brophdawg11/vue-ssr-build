@@ -4,7 +4,13 @@ module.exports = (api) => {
         presets: [
             ['@babel/preset-env', {
                 targets: {
-                    browsers: ['>5%', 'last 2 versions'],
+                    browsers: [
+                        'Chrome >= 61',
+                        'Safari >= 11',
+                        'iOS >= 11',
+                        'Firefox >= 60',
+                        'Edge >= 16',
+                    ],
                 },
                 modules: false,
             }],
