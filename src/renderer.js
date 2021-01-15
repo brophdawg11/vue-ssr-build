@@ -5,6 +5,8 @@ const path = require('path');
 const LRU = require('lru-cache');
 const { createBundleRenderer } = require('vue-server-renderer');
 
+const { performanceRegistry } = require('./performance');
+
 const errorHandler = (err, res, cb) => {
     if (err.url) {
         res.redirect(err.url);
@@ -128,7 +130,12 @@ function render(config, clientManifest, req, res) {
     const renderFn = config.stream ? renderToStream : renderToString;
 
     config.logger.log(`Rendering from ${config.name} renderer!`);
+
+    const startRender = Date.now();
     renderFn(config, context, res, () => {
+        performanceRegistry.addRecordingForURL(
+            'vue-ssr Render', Date.now() - startRender, req.path);
+
         if (config.componentCacheDebug) {
             config.logger.log('Component cache stats:');
             config.logger.log('  length:', caches[config.name].length);

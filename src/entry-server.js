@@ -1,3 +1,5 @@
+import { performanceRegistry } from './performance';
+
 // Server side data loading approach based on:
 // https://ssr.vuejs.org/en/data.html#client-data-fetching
 
@@ -31,6 +33,7 @@ export default function initializeServer(createApp, serverOpts) {
                 }
 
                 if (opts.vuexModules) {
+                    const startVuexModules = Date.now();
                     // Register any dynamic Vuex modules.  Registering the store
                     // modules as part of the component allows the module to be bundled
                     // with the async-loaded component and not in the initial root store
@@ -48,6 +51,10 @@ export default function initializeServer(createApp, serverOpts) {
                                 preserveState: store.state[moduleName] != null,
                             });
                         });
+                    performanceRegistry.addRecordingForURL(
+                        'vue-ssr Vuex Modules',
+                        Date.now() - startVuexModules,
+                        context.request.path);
                 }
 
                 const fetchDataArgs = {
@@ -64,7 +71,15 @@ export default function initializeServer(createApp, serverOpts) {
                     .then(() => opts.middleware(context, app, router, store))
                     .then(() => Promise.all([
                         opts.globalFetchData(fetchDataArgs),
-                        ...components.map(fetchData),
+                        ...components.map((c) => {
+                            const startFetchData = Date.now();
+                            const result = fetchData(c);
+                            performanceRegistry.addRecordingForURL(
+                                `fetchData ${c.name}`,
+                                Date.now() - startFetchData,
+                                context.request.path);
+                            return result;
+                        }),
                     ]))
                     .then(() => opts.postMiddleware(context, app, router, store))
                     // Set initialState and translations to be embedded into
