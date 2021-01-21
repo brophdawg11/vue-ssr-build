@@ -67,6 +67,28 @@ const perfEnabled = () => (
 const getCurrentPerfMark = () => window.performance.getEntriesByType('mark')
     .find(m => m.name.startsWith(PERF_PREFIX) && m.name.endsWith('start'));
 
+function perfMarkNameFromRoute(route) {
+    let result;
+    const routeName = get(route, 'name') || '';
+
+    if (routeName.toLowerCase() === 'catch-all') {
+        const slugParam = get(route, 'params.slug');
+
+        if (slugParam && slugParam !== '') {
+            result = `Category (${slugParam})`;
+        } else {
+            result = 'Category';
+        }
+    } else if (routeName !== '') {
+        result = routeName;
+    } else {
+        const pageType = get(route, 'meta.pageType');
+        result = pageType;
+    }
+
+    return result;
+}
+
 function perfInit(to, from) {
     if (!perfEnabled()) {
         return;
@@ -83,7 +105,8 @@ function perfInit(to, from) {
 
     // Start a new routing operation with a mark such as:
     //   urbnperf|Homepage->Catch-All|start
-    window.performance.mark(`${PERF_PREFIX}|${from.name}->${to.name}|start`);
+    window.performance.mark(
+        `${PERF_PREFIX}|${perfMarkNameFromRoute(from)}->${perfMarkNameFromRoute(to)}|start`);
 }
 
 // Issue a performance.measure call for the given name using the most recent
