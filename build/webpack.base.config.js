@@ -139,7 +139,7 @@ module.exports = {
                                 loader: 'sass-loader',
                                 ...(config.sassLoaderData ? {
                                     options: {
-                                        prependData: config.sassLoaderData,
+                                        additionalData: config.sassLoaderData,
                                     },
                                 } : {}),
                             },

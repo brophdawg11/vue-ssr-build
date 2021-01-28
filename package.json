@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
@@ -41,11 +41,11 @@
     "jest-serializer-vue": "2.0.2",
     "lodash-es": "4.17.20",
     "lru-cache": "6.0.0",
-    "mini-css-extract-plugin": "1.3.3",
-    "node-sass": "4.13.1",
+    "mini-css-extract-plugin": "1.3.4",
     "optimize-css-assets-webpack-plugin": "5.0.4",
     "postcss-loader": "4.1.0",
-    "sass-loader": "8.0.2",
+    "sass": "1.32.5",
+    "sass-loader": "10.1.1",
     "svg-inline-loader": "0.8.2",
     "svg-url-loader": "6.0.0",
     "tar": "4.4.8",
@@ -63,7 +63,7 @@
     "webpack-dev-middleware": "4.0.2",
     "webpack-hot-middleware": "2.25.0",
     "webpack-hot-server-middleware": "0.6.1",
-    "webpack-merge": "5.7.2"
+    "webpack-merge": "5.7.3"
   },
   "peerDependencies": {
     "lru-cache": "^6.0.0",
@@ -71,6 +71,6 @@
     "vue-server-renderer": "^2.6.12"
   },
   "devDependencies": {
-    "husky": "4.3.6"
+    "husky": "4.3.8"
   }
 }
