@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-build",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "description": "Vue.js SSR Build Helper",
   "author": "matt@brophy.org",
   "license": "MIT",
@@ -68,7 +68,8 @@
   "peerDependencies": {
     "lru-cache": "^6.0.0",
     "vue": "^2.6.12",
-    "vue-server-renderer": "^2.6.12"
+    "vue-server-renderer": "^2.6.12",
+    "newrelic": "^6.14.0"
   },
   "devDependencies": {
     "husky": "4.3.8"
