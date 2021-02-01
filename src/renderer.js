@@ -5,6 +5,12 @@ const path = require('path');
 const LRU = require('lru-cache');
 const { createBundleRenderer } = require('vue-server-renderer');
 
+let newrelic;
+if (process.env.NEW_RELIC_APP_NAME && process.env.NEW_RELIC_LICENSE_KEY) {
+    // eslint-disable-next-line global-require
+    newrelic = require('newrelic');
+}
+
 const errorHandler = (err, res, cb) => {
     if (err.url) {
         res.redirect(err.url);
@@ -84,7 +90,7 @@ function createRenderer(bundle, options, config) {
     }, config.rendererOpts));
 }
 
-function renderToString(config, context, res, cb) {
+function renderToStringImpl(config, context, res, cb) {
     renderers[config.name].renderToString(context,
         (err, html) => {
             if (err) {
@@ -97,7 +103,19 @@ function renderToString(config, context, res, cb) {
         e => config.errorHandler(e, res, cb));
 }
 
-function renderToStream(config, context, res, cb) {
+function renderToString(config, context, res, cb) {
+    if (newrelic) {
+        const callbackWrapper = () => cb();
+        newrelic.startSegment(
+            'ssr:render:toString',
+            true,
+            () => renderToStringImpl(config, context, res, callbackWrapper));
+    } else {
+        renderToStringImpl(config, context, res, cb);
+    }
+}
+
+function renderToStreamImpl(config, context, res, cb) {
     const stream = renderers[config.name].renderToStream(context);
     stream.on('data', data => res.write(data.toString()));
     stream.on('end', () => {
@@ -105,6 +123,18 @@ function renderToStream(config, context, res, cb) {
         cb();
     });
     stream.on('error', err => config.errorHandler(err, res, cb));
+}
+
+function renderToStream(config, context, res, cb) {
+    if (newrelic) {
+        const callbackWrapper = () => cb();
+        newrelic.startSegment(
+            'ssr:render:toStream',
+            true,
+            () => renderToStreamImpl(config, context, res, callbackWrapper));
+    } else {
+        renderToStreamImpl(config, context, res, cb);
+    }
 }
 
 function render(config, clientManifest, req, res) {
