@@ -24,6 +24,7 @@
     "@babel/plugin-proposal-object-rest-spread": "7.13.0",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
     "@babel/preset-env": "7.13.5",
+    "@babel/types": "7.13.0",
     "@intlify/vue-i18n-loader": "1.0.0",
     "babel-core": "7.0.0-bridge.0",
     "babel-jest": "26.6.3",
