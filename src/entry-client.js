@@ -1,4 +1,4 @@
-import { get, isEqual, isFunction, isString, uniq } from 'lodash-es';
+import { get, isEqual, isFunction, isString, sortBy, uniq } from 'lodash-es';
 
 import { getModuleName, safelyRegisterModule } from './utils';
 
@@ -206,7 +206,9 @@ export default function initializeClient(createApp, clientOpts) {
             const requeueModules = [];
             const { logger } = opts;
             while (queuedRemovalModules.length > 0) {
-                const name = queuedRemovalModules.shift();
+                // Unregister from the end of the queue, so we go upwards from child
+                // components to parent components in nested route scenarios
+                const name = queuedRemovalModules.pop();
                 const nameArr = name.split('/');
                 if ([...toModuleNames, ...fromModuleNames].includes(name)) {
                     // Can't remove yet - still actively used.  Queue up for the next route
@@ -222,7 +224,9 @@ export default function initializeClient(createApp, clientOpts) {
 
             // Queue up the prior route modules for removal on the next route
             const nextRouteRemovals = uniq([...requeueModules, ...fromModuleNames]);
-            queuedRemovalModules.push(...nextRouteRemovals);
+            // Sort by depth, so that we remove deeper modules first using .pop()
+            const sortedRouteRemovals = sortBy(nextRouteRemovals, [m => m.split('/').length]);
+            queuedRemovalModules.push(...sortedRouteRemovals);
         });
     }
 
