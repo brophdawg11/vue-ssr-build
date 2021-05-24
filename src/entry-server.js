@@ -1,3 +1,5 @@
+import { getModuleName, safelyRegisterModule } from './utils';
+
 // Server side data loading approach based on:
 // https://ssr.vuejs.org/en/data.html#client-data-fetching
 
@@ -37,16 +39,10 @@ export default function initializeServer(createApp, serverOpts) {
                     // bundle
                     components
                         .filter(c => 'vuex' in c)
-                        .forEach((c) => {
-                            // Allow a function to be passed that can generate a route-aware
-                            // module name
-                            const moduleName = typeof c.vuex.moduleName === 'function' ?
-                                c.vuex.moduleName({ $route: router.currentRoute }) :
-                                c.vuex.moduleName;
-                            opts.logger.info('Registering dynamic Vuex module:', moduleName);
-                            store.registerModule(moduleName, c.vuex.module, {
-                                preserveState: store.state[moduleName] != null,
-                            });
+                        .flatMap(c => c.vuex)
+                        .forEach((vuexModuleDef) => {
+                            const name = getModuleName(vuexModuleDef, router.currentRoute);
+                            safelyRegisterModule(store, name, vuexModuleDef.module, opts.logger);
                         });
                 }
 
