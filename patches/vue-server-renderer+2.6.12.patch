@@ -1,0 +1,90 @@
+diff --git a/node_modules/vue-server-renderer/build.dev.js b/node_modules/vue-server-renderer/build.dev.js
+index fb4caf5..a39e93c 100644
+--- a/node_modules/vue-server-renderer/build.dev.js
++++ b/node_modules/vue-server-renderer/build.dev.js
+@@ -9060,12 +9060,14 @@ TemplateRenderer.prototype.renderScripts = function renderScripts (context) {
+     var initial = this.preloadFiles.filter(function (ref) {
+         var file = ref.file;
+ 
+-        return isJS(file);
++        // brophdawg11: changed line for webpack 5
++        return isJS(file) && !file.endsWith('hot-update.js');
+       });
+     var async = (this.getUsedAsyncFiles(context) || []).filter(function (ref) {
+         var file = ref.file;
+ 
+-        return isJS(file);
++        // brophdawg11: changed line for webpack 5
++        return isJS(file) && !file.endsWith('hot-update.js');
+       });
+     var needed = [initial[0]].concat(async, initial.slice(1));
+     return needed.map(function (ref) {
+diff --git a/node_modules/vue-server-renderer/client-plugin.js b/node_modules/vue-server-renderer/client-plugin.js
+index 15cdcbd..539973d 100644
+--- a/node_modules/vue-server-renderer/client-plugin.js
++++ b/node_modules/vue-server-renderer/client-plugin.js
+@@ -45,7 +45,8 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
+       .map(function (a) { return a.name; }));
+ 
+     var initialFiles = uniq(Object.keys(stats.entrypoints)
+-      .map(function (name) { return stats.entrypoints[name].assets; })
++      // brophdawg11: changed line for webpack 5
++      .map(function (name) { return stats.entrypoints[name].assets.map(file => file.name); })
+       .reduce(function (assets, all) { return all.concat(assets); }, [])
+       .filter(function (file) { return isJS(file) || isCSS(file); }));
+ 
+@@ -71,7 +72,8 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
+         if (!chunk || !chunk.files) {
+           return
+         }
+-        var id = m.identifier.replace(/\s\w+$/, ''); // remove appended hash
++        // brophdawg11: changed line for webpack 5
++        var id = m.identifier.replace(/\|\w+$/, ''); // remove appended hash
+         var files = manifest.modules[hash(id)] = chunk.files.map(fileToIndex);
+         // find all asset modules associated with the same chunk
+         assetModules.forEach(function (m) {
+diff --git a/node_modules/vue-server-renderer/server-plugin.js b/node_modules/vue-server-renderer/server-plugin.js
+index 54ba2b3..a67c7f2 100644
+--- a/node_modules/vue-server-renderer/server-plugin.js
++++ b/node_modules/vue-server-renderer/server-plugin.js
+@@ -17,7 +17,8 @@ var validate = function (compiler) {
+     warn('webpack config `target` should be "node".');
+   }
+ 
+-  if (compiler.options.output && compiler.options.output.libraryTarget !== 'commonjs2') {
++  // brophdawg11: changed line for webpack 5
++  if (compiler.options.output && compiler.options.output.library.type !== 'commonjs2') {
+     warn('webpack config `output.libraryTarget` should be "commonjs2".');
+   }
+ 
+@@ -62,7 +63,8 @@ VueSSRServerPlugin.prototype.apply = function apply (compiler) {
+       return cb()
+     }
+ 
+-    var entryAssets = entryInfo.assets.filter(isJS);
++    // brophdawg11: changed line for webpack 5
++    var entryAssets = entryInfo.assets.filter(file => isJS(file.name));
+ 
+     if (entryAssets.length > 1) {
+       throw new Error(
+@@ -71,15 +73,18 @@ VueSSRServerPlugin.prototype.apply = function apply (compiler) {
+       )
+     }
+ 
++    debugger;
+     var entry = entryAssets[0];
+-    if (!entry || typeof entry !== 'string') {
++    // brophdawg11: changed line for webpack 5
++    if (!entry || typeof entry.name !== 'string') {
+       throw new Error(
+         ("Entry \"" + entryName + "\" not found. Did you specify the correct entry option?")
+       )
+     }
+ 
+     var bundle = {
+-      entry: entry,
++      // brophdawg11: changed line for webpack 5
++      entry: entry.name,
+       files: {},
+       maps: {}
+     };
