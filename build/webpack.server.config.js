@@ -43,7 +43,9 @@ module.exports = function getServerConfig(configOpts) {
         entry: './src/server/entry-server.js',
         output: {
             filename: 'server-bundle.js',
-            libraryTarget: 'commonjs2',
+            library: {
+                type: 'commonjs2',
+            },
         },
         target: 'node',
         externals: serverExternals,
