@@ -1,7 +1,5 @@
 /* eslint-disable no-console */
 
-const path = require('path');
-
 const webpack = require('webpack');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -10,14 +8,11 @@ const isLocal = process.env.NODE_ENV === 'local';
 const isProd = process.env.NODE_ENV === 'production';
 const isDev = !isLocal && !isProd;
 const logLevel = process.env.LOG_LEVEL || 'debug';
-const environment = isProd ? 'production' : 'development';
+const nodeEnv = isProd ? 'production' : 'development';
 
-console.log(`process.env.NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`Webpack building for environment: ${environment}`);
+console.log(`Webpack building for NODE_ENV: ${nodeEnv}`);
 
 function getCssLoaders(config) {
-    console.log(`Enable PostCSS: ${config.enablePostCss}`);
-
     const addlLoaders = [
         ...(config.enablePostCss ? [{
             loader: 'postcss-loader',
@@ -71,25 +66,12 @@ module.exports = {
     logLevel,
     getBaseConfig(config) {
         return {
-            mode: environment,
+            mode: nodeEnv,
             devtool: isProd ? 'source-map' : 'eval-source-map',
             output: {
                 publicPath: '/dist/',
                 filename: isProd ? '[name].[chunkhash].js' : '[name].js',
                 chunkFilename: isProd ? '_[name].[chunkhash].js' : '_[name].js',
-            },
-            resolve: {
-                alias: {
-                    '@components': path.resolve(config.rootDir, 'src/components'),
-                    '@dist': path.resolve(config.rootDir, 'dist'),
-                    '@js': path.resolve(config.rootDir, 'src/js'),
-                    '@scss': path.resolve(config.rootDir, 'src/scss'),
-                    '@server': path.resolve(config.rootDir, 'src/server'),
-                    '@src': path.resolve(config.rootDir, 'src'),
-                    '@static': path.resolve(config.rootDir, 'static'),
-                    '@store': path.resolve(config.rootDir, 'src/store'),
-                },
-                extensions: ['*', '.js', '.vue', '.json'],
             },
             module: {
                 rules: [
@@ -160,7 +142,7 @@ module.exports = {
                             resourceQuery: /inline/,
                             use: {
                                 loader: 'svg-inline-loader',
-                                options: config.svgInlineLoaderOptions,
+                                options: config.svgInlineLoaderOptions || {},
                             },
                         }, {
                             resourceQuery: /http/,
@@ -186,7 +168,7 @@ module.exports = {
             },
             plugins: [
                 new webpack.DefinePlugin({
-                    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+                    'process.env.NODE_ENV': JSON.stringify(nodeEnv),
                 }),
                 new VueLoaderPlugin(),
                 ...(config.extractCss ? [

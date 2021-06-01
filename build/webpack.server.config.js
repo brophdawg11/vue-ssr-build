@@ -5,7 +5,7 @@ const VueSSRServerPlugin = require('vue-server-renderer/server-plugin');
 
 const { getBaseConfig } = require('./webpack.base.config');
 
-function serverExternals(context, request, callback) {
+function serverExternals({ request }, callback) {
     // Tell webpack to ignore all node_modules dependencies except
     // lodash-es so we get proper tree shaking
     const nonRelativeExp = /^\w.*$/i;
