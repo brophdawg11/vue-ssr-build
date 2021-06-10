@@ -15,8 +15,7 @@
   "scripts": {
     "bump": "npm --no-git-tag-version version minor",
     "bump:patch": "npm --no-git-tag-version version patch",
-    "lint": "eslint .",
-    "postinstall": "patch-package"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@babel/core": "7.13.1",
