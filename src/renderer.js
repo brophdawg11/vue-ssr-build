@@ -113,7 +113,7 @@ function render(config, clientManifest, req, res) {
     config.logger.log('\n\nVue request started', new Date().toISOString());
 
     const context = {
-        title: 'URBN Community',
+        title: 'Vue SSR Application',
         request: req,
         response: res,
         url: req.url,

@@ -27,6 +27,7 @@ module.exports = function getClientConfig(configOpts) {
 
     const clientConfig = merge(getBaseConfig(config), {
         name: 'client',
+        devtool: isProd ? 'source-map' : 'eval-source-map',
         entry: {
             app: './src/js/entry-client.js',
         },

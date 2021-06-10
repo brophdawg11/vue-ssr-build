@@ -1,4 +1,4 @@
-import { get, isEqual, isFunction, isString, sortBy, uniq } from 'lodash-es';
+import { get, isEqual, isFunction, sortBy, uniq } from 'lodash-es';
 
 import { getModuleName, safelyRegisterModule } from './utils';
 
@@ -119,7 +119,6 @@ export default function initializeClient(createApp, clientOpts) {
         appSelector: '#app',
         hmr: true,
         initialState: null,
-        initialStateMetaTag: 'initial-state',
         vuexModules: true,
         middleware: () => Promise.resolve(),
         globalFetchData: () => Promise.resolve(),
@@ -139,22 +138,9 @@ export default function initializeClient(createApp, clientOpts) {
     enablePerfMarks = opts.enablePerfMarks;
 
     const { shouldProcessRouteUpdateDefaults: spruDefaults } = opts;
-    let { initialState } = opts;
-
-    if (isString(opts.initialStateMetaTag)) {
-        if (initialState) {
-            opts.logger.error('initialState and initialStateMetaTag should not be used together');
-        }
-        try {
-            const meta = document.querySelector(`meta[name="${opts.initialStateMetaTag}"]`);
-            initialState = JSON.parse(meta.getAttribute('content'));
-        } catch (e) {
-            opts.logger.error(`Error parsing meta tag content: ${opts.initialStateMetaTag}`);
-        }
-    }
 
     const { app, router, store } = createApp({
-        initialState,
+        initialState: opts.initialState,
     });
 
     if (opts.vuexModules) {
